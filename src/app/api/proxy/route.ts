@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
     try {
       const data = JSON.parse(rawText);
       return NextResponse.json(data);
-    } catch (parseError) {
+    } catch {
       // If it fails to parse, it means the server sent back plain text/HTML on a 200 OK
       return NextResponse.json({
         error: "Server did not return valid JSON",
