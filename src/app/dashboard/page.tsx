@@ -156,8 +156,8 @@ export default function Dashboard() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-blue-50 font-sans text-gray-900 antialiased">
+return (
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-gray-50 to-blue-50 font-sans text-gray-900 antialiased">
       {/* Ambient background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-100/40 rounded-full blur-3xl" />
@@ -168,7 +168,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto space-y-8">
           {/* TOP BAR / HEADER */}
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg shadow-gray-200/50 border border-white/60 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">
+            <div className="bg-linear-to-r from-blue-600 via-blue-700 to-indigo-700 px-8 py-6">
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 bg-white/15 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20">
@@ -205,7 +205,7 @@ export default function Dashboard() {
                     <button
                       onClick={handleLogin}
                       disabled={isLoading}
-                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[140px] gap-2 shadow-sm"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-35 gap-2 shadow-sm"
                     >
                       {isLoading ? (
                         <>
@@ -312,7 +312,7 @@ export default function Dashboard() {
               <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
                 Total Logs
               </span>
-              <p className="text-3xl font-black mt-1 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+              <p className="text-3xl font-black mt-1 bg-linear-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
                 {usage?.id ? "1" : "0"}
               </p>
             </div>
@@ -404,7 +404,7 @@ export default function Dashboard() {
             {/* Table Header */}
             <div className="px-8 py-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200/50">
+                <div className="w-9 h-9 bg-linear-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-200/50">
                   <svg
                     className="w-4 h-4 text-white"
                     fill="none"
@@ -436,7 +436,7 @@ export default function Dashboard() {
                   (Array.isArray(usage) && usage.length === 0) ||
                   !usage.id
                 }
-                className="inline-flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
+                className="inline-flex items-center gap-2 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
               >
                 <svg
                   className="w-4 h-4"
@@ -577,7 +577,7 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    <tr className="group hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/30 transition-all duration-200">
+                    <tr className="group hover:bg-linear-to-r hover:from-blue-50/50 hover:to-indigo-50/30 transition-all duration-200">
                       {/* Node IDs */}
                       <td className="px-8 py-5">
                         <div className="flex flex-col gap-1.5">
@@ -596,7 +596,7 @@ export default function Dashboard() {
                       {/* Client Name */}
                       <td className="px-8 py-5">
                         <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-200/50">
+                          <div className="w-9 h-9 bg-linear-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-200/50">
                             {usage.name?.charAt(0)?.toUpperCase() || "?"}
                           </div>
                           <span className="font-bold text-gray-800">
@@ -609,7 +609,7 @@ export default function Dashboard() {
                       <td className="px-8 py-5">
                         <div className="flex items-start gap-2">
                           <svg
-                            className="w-4 h-4 text-gray-300 mt-0.5 flex-shrink-0"
+                            className="w-4 h-4 text-gray-300 mt-0.5 shrink-0"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -637,7 +637,7 @@ export default function Dashboard() {
                         <div className="space-y-1.5">
                           <div className="flex items-center gap-2">
                             <svg
-                              className="w-3.5 h-3.5 text-gray-300 flex-shrink-0"
+                              className="w-3.5 h-3.5 text-gray-300 shrink-0"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -661,7 +661,7 @@ export default function Dashboard() {
                           </div>
                           <div className="flex items-center gap-2">
                             <svg
-                              className="w-3.5 h-3.5 text-gray-300 flex-shrink-0"
+                              className="w-3.5 h-3.5 text-gray-300 shrink-0"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
