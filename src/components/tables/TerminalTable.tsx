@@ -19,6 +19,7 @@ import { formatBytes } from "@/lib/utils";
 import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";
+import { toast } from "sonner";
 
 export default function TerminalTable({
   data,
@@ -67,7 +68,6 @@ export default function TerminalTable({
       return matchSearch && matchStatus && matchPackage;
     });
   }, [data, search, statusFilter, packageFilter]);
-  console.log(filteredData.length)
   const enrichedData = useMemo(() => {
     return filteredData.map((item) => {
       const clientConsumption = consumptionMap[item.clientId] || [];
@@ -170,28 +170,30 @@ export default function TerminalTable({
 
     XLSX.writeFile(workbook, `Terminal-Table.xlsx`);
   };
-  const [result, setResult] = useState<TerminalNode[]>([]);
-  const [loading, setLoading] = useState(false);
 
+  // to generate the filtered clients, those status = "Connected" and excluding those packageName includes "CHB"
+  const [loading, setLoading] = useState(false);
   const handleClick = async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/filter-terminal-nodes");
-      const data = await res.json();
-      setResult(data);
+      if (res.ok) {
+        toast.success("Terminal Nodes Filtered", { description: "Only connected nodes are included; CHB package entries are excluded." })
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
-  console.log(result)
+
   return (
     <div className="w-full font-lexend text-sm">
-      <div className="w-full flex flex-row items-center justify-end pb-3">
+      <div className="w-full flex flex-row items-center justify-end gap-3 pb-3">
+
         <button
           onClick={handleClick}
-          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
+          className="w-fit flex items-center gap-1 bg-linear-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-slate-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
         >
           <Download className="w-5 h-5 shrink-0" />
           {loading ? "Processing..." : "Filter Terminal Nodes"}
@@ -386,118 +388,121 @@ export default function TerminalTable({
       </div>
 
       {/* 📊 Table */}
-      <div className="max-h-169.5 overflow-y-auto border border-slate-300 rounded-lg">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-200 sticky top-0">
-            <tr>
-              <th className="p-2 text-left">No</th>
-              <th className="p-2 text-left">ID</th>
-              <th className="p-2 text-left">Client</th>
-              <th className="p-2 text-left">City</th>
-              <th className="p-2 text-left">Status</th>
-              <th className="p-2 text-left">Package</th>
-              <th className="p-2 text-left">OLT</th>
-              <th className="p-2 text-left">Serial</th>
-              <th
-                className="p-2 text-left"
-                onClick={() =>
-                  setSortConfig((prev) =>
-                    prev?.key === "totalUp" && prev.direction === "asc"
-                      ? { key: "totalUp", direction: "desc" }
-                      : { key: "totalUp", direction: "asc" },
-                  )
-                }
-              >
-                <div className="flex flex-row items-center gap-2 cursor-pointer">
-                  Upload
-                  {sortConfig?.key === "totalUp" ? (
-                    sortConfig.direction === "asc" ? (
-                      <ChevronUp className="w-4 h-4 shrink-0" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 shrink-0" />
+      <div className="w-full flex flex-col items-center gap-5">
+        <div className="max-h-169.5 overflow-y-auto border border-slate-300 rounded-lg">
+          <table className="w-full text-sm">
+            <thead className="bg-slate-200 sticky top-0">
+              <tr>
+                <th className="p-2 text-left">No</th>
+                <th className="p-2 text-left">ID</th>
+                <th className="p-2 text-left">Client</th>
+                <th className="p-2 text-left">City</th>
+                <th className="p-2 text-left">Status</th>
+                <th className="p-2 text-left">Package</th>
+                <th className="p-2 text-left">OLT</th>
+                <th className="p-2 text-left">Serial</th>
+                <th
+                  className="p-2 text-left"
+                  onClick={() =>
+                    setSortConfig((prev) =>
+                      prev?.key === "totalUp" && prev.direction === "asc"
+                        ? { key: "totalUp", direction: "desc" }
+                        : { key: "totalUp", direction: "asc" },
                     )
-                  ) : null}
-                </div>
-              </th>
-              <th
-                className="p-2 text-left"
-                onClick={() =>
-                  setSortConfig((prev) =>
-                    prev?.key === "totalDown" && prev.direction === "asc"
-                      ? { key: "totalDown", direction: "desc" }
-                      : { key: "totalDown", direction: "asc" },
-                  )
-                }
-              >
-                <div className="flex flex-row items-center gap-2 cursor-pointer">
-                  Download
-                  {sortConfig?.key === "totalDown" ? (
-                    sortConfig.direction === "asc" ? (
-                      <ChevronUp className="w-4 h-4 shrink-0" />
-                    ) : (
-                      <ChevronDown className="w-4 h-4 shrink-0" />
-                    )
-                  ) : null}
-                </div>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {paginatedData.map((item, index) => {
-              return (
-                <tr
-                  key={`${item.id}-${index}`}
-                  onClick={() => {
-                    setSelectedClientId(item.clientId);
-                    setOpenDialog(true);
-                  }}
-                  className="border-t border-t-slate-300 even:bg-slate-100 hover:bg-blue-100 cursor-pointer"
+                  }
                 >
-                  <td className="p-2"> {(page - 1) * limit + index + 1}</td>
-                  <td className="p-2">{item.clientId}</td>
-                  <td className="p-2">{item.clientName}</td>
-                  <td className="p-2">{item.cityName}</td>
-                  <td className="p-2">
-                    {item.status === "Suspended" ? (
-                      <div className="px-2 py-1 rounded border border-red-500 bg-red-500/10 text-red-600 text-sm inline-block">
-                        Suspended
+                  <div className="flex flex-row items-center gap-2 cursor-pointer">
+                    Upload
+                    {sortConfig?.key === "totalUp" ? (
+                      sortConfig.direction === "asc" ? (
+                        <ChevronUp className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0" />
+                      )
+                    ) : null}
+                  </div>
+                </th>
+                <th
+                  className="p-2 text-left"
+                  onClick={() =>
+                    setSortConfig((prev) =>
+                      prev?.key === "totalDown" && prev.direction === "asc"
+                        ? { key: "totalDown", direction: "desc" }
+                        : { key: "totalDown", direction: "asc" },
+                    )
+                  }
+                >
+                  <div className="flex flex-row items-center gap-2 cursor-pointer">
+                    Download
+                    {sortConfig?.key === "totalDown" ? (
+                      sortConfig.direction === "asc" ? (
+                        <ChevronUp className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0" />
+                      )
+                    ) : null}
+                  </div>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {paginatedData.map((item, index) => {
+                return (
+                  <tr
+                    key={`${item.id}-${index}`}
+                    onClick={() => {
+                      setSelectedClientId(item.clientId);
+                      setOpenDialog(true);
+                    }}
+                    className="border-t border-t-slate-300 even:bg-slate-100 hover:bg-blue-100 cursor-pointer"
+                  >
+                    <td className="p-2"> {(page - 1) * limit + index + 1}</td>
+                    <td className="p-2">{item.clientId}</td>
+                    <td className="p-2">{item.clientName}</td>
+                    <td className="p-2">{item.cityName}</td>
+                    <td className="p-2">
+                      {item.status === "Suspended" ? (
+                        <div className="px-2 py-1 rounded border border-red-500 bg-red-500/10 text-red-600 text-sm inline-block">
+                          Suspended
+                        </div>
+                      ) : (
+                        <div className="px-2 py-1 rounded border border-green-500 bg-green-500/10 text-green-600 text-sm inline-block">
+                          Connected
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-2 text-nowrap">{item.packageName}</td>
+                    <td className="p-2 text-nowrap">{item.oltName}</td>
+                    <td className="p-2">{item.serialNumber}</td>
+                    <td className="p-2">
+                      {formatBytes(item.totalUp)}
+                      <div className="text-xs text-slate-500">
+                        {item.totalUp.toLocaleString()} bytes
                       </div>
-                    ) : (
-                      <div className="px-2 py-1 rounded border border-green-500 bg-green-500/10 text-green-600 text-sm inline-block">
-                        Connected
+                    </td>
+
+                    <td className="p-2">
+                      {formatBytes(item.totalDown)}
+                      <div className="text-xs text-slate-500">
+                        {item.totalDown.toLocaleString()} bytes
                       </div>
-                    )}
-                  </td>
-                  <td className="p-2 text-nowrap">{item.packageName}</td>
-                  <td className="p-2 text-nowrap">{item.oltName}</td>
-                  <td className="p-2">{item.serialNumber}</td>
-                  <td className="p-2">
-                    {formatBytes(item.totalUp)}
-                    <div className="text-xs text-slate-500">
-                      {item.totalUp.toLocaleString()} bytes
-                    </div>
-                  </td>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
 
-                  <td className="p-2">
-                    {formatBytes(item.totalDown)}
-                    <div className="text-xs text-slate-500">
-                      {item.totalDown.toLocaleString()} bytes
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+          {selectedClientId && (
+            <DialogScrollableContent
+              data={selectedConsumption}
+              id={selectedClientId}
+              openDialog={openDialog}
+              setOpenDialog={setOpenDialog}
+            />
+          )}
+        </div>
 
-        {selectedClientId && (
-          <DialogScrollableContent
-            data={selectedConsumption}
-            id={selectedClientId}
-            openDialog={openDialog}
-            setOpenDialog={setOpenDialog}
-          />
-        )}
       </div>
 
       {/* 📄 Pagination Controls */}

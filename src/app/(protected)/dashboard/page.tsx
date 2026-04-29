@@ -9,7 +9,7 @@ import {
 } from "@/components/Types";
 import { useState, FormEvent, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
-import BandwidthChart from "../../components/BandwidthChart";
+import BandwidthChart from "../../../components/BandwidthChart";
 import Consumption from "@/components/Consumption";
 import { DatePickerInput } from "@/components/DatePickerInput";
 import { getEndOfMonth, getStartOfMonth } from "@/lib/utils";
@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import TerminalTable from "@/components/tables/TerminalTable";
+import { toast } from "sonner";
 export default function Dashboard() {
   const [data, setData] = useState<TerminalNode[]>([])
   const [data2, setData2] = useState<ConsumptionGroupedByClient[]>([])
@@ -241,6 +242,7 @@ export default function Dashboard() {
     } finally {
       setFetchLoading(false);
       hasMountedRef.current = true
+      toast.success("Data loaded successfully!")
     }
   };
   useEffect(() => {

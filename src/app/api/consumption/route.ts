@@ -12,18 +12,29 @@ export async function GET(req: NextRequest) {
   const token = searchParams.get("token");
   const startDate = searchParams.get("start");
   const endDate = searchParams.get("end");
+  // 1. Load terminal nodes file
+  const res = await fetch("/data/filtered_terminal_nodes.json"
+  );
 
+  const terminalNodes: TerminalNode[] = await res.json();
+  if (!res.ok) {
+    console.log("%cFailed to fetch terminal node", "color: red")
+    return NextResponse.json({ error: "Invalid client ID" }, { status: 500 });
+  }
   if (!clientID || isNaN(Number(clientID))) {
     return NextResponse.json({ error: "Invalid client ID" }, { status: 400 });
   }
-
   if (!token) {
     return NextResponse.json({ error: "Missing token" }, { status: 401 });
   }
 
-  const terminalNodeId = Number(clientID) - 1;
+  const client = terminalNodes.find((a) => a.clientId === Number(clientID))
 
-  const baseUrl = `https://110.93.79.226/api/fttx/terminal-nodes/${terminalNodeId}/consumption-logs`;
+  if (!client) {
+    console.log("%cClient not found!", "color: red")
+    return
+  }
+  const baseUrl = `https://110.93.79.226/api/fttx/terminal-nodes/${client.id}/consumption-logs`;
 
   const filter = {
     order: "consumptionDay ASC",
@@ -59,22 +70,21 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.json(data);
     } else if (reqType === "multiple") {
-      // 1. Load terminal nodes file
-      const terminalPath = path.join(
-        process.cwd(),
-        "src",
-        "data",
-        "terminal_nodes.json",
-      );
 
-      const terminalRaw = fs.readFileSync(terminalPath, "utf-8");
-      const terminalNodes = JSON.parse(terminalRaw);
+      // const terminalPath = path.join(
+      //   process.cwd(),
+      //   "src",
+      //   "data",
+      //   "terminal_nodes.json",
+      // );
+
+      // const terminalRaw = fs.readFileSync(terminalPath, "utf-8");
+      // const terminalNodes = JSON.parse(terminalRaw);
 
       // 2. Filter connected clients
-      const connectedClients = terminalNodes.filter(
-        (item: TerminalNode) => item.status === "Connected",
-      );
-
+      const connectedClients = terminalNodes.filter((item: TerminalNode) => {
+        return item.status?.toLowerCase().trim() === "connected";
+      });
       console.log(`Connected clients: ${connectedClients.length}`);
 
       const results: ConsumptionGroupedByClient[] = [];
@@ -83,6 +93,7 @@ export async function GET(req: NextRequest) {
       for (const client of connectedClients) {
         const clientID = client.clientId;
         const terminalNodeId = client.id;
+
         console.log(
           `[FETCH START] Client ID: ${clientID}, Terminal Node ID: ${terminalNodeId}`,
         );
@@ -128,9 +139,9 @@ export async function GET(req: NextRequest) {
       // 4. Save to file
       const outputPath = path.join(
         process.cwd(),
-        "src",
+        "public",
         "data",
-        "consumption_data.json",
+        "consumption_data.json"
       );
 
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
