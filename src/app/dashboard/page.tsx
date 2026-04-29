@@ -523,7 +523,7 @@ export default function Dashboard() {
                     Security Status
                   </span>
                   <p className="text-lg font-bold mt-1 text-emerald-600">
-                    Verified hahahahaha
+                    Verified
                   </p>
                 </div>
 
