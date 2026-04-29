@@ -67,6 +67,7 @@ export default function TerminalTable({
       return matchSearch && matchStatus && matchPackage;
     });
   }, [data, search, statusFilter, packageFilter]);
+  console.log(filteredData.length)
   const enrichedData = useMemo(() => {
     return filteredData.map((item) => {
       const clientConsumption = consumptionMap[item.clientId] || [];
@@ -169,9 +170,33 @@ export default function TerminalTable({
 
     XLSX.writeFile(workbook, `Terminal-Table.xlsx`);
   };
+  const [result, setResult] = useState<TerminalNode[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleClick = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/filter-terminal-nodes");
+      const data = await res.json();
+      setResult(data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  console.log(result)
   return (
     <div className="w-full font-lexend text-sm">
       <div className="w-full flex flex-row items-center justify-end pb-3">
+        <button
+          onClick={handleClick}
+          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
+        >
+          <Download className="w-5 h-5 shrink-0" />
+          {loading ? "Processing..." : "Filter Terminal Nodes"}
+        </button>
+
         <button
           onClick={handleExportTable}
           className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
