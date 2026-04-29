@@ -3,7 +3,6 @@ import fs from "fs";
 import path from "path";
 import {
   ConsumptionGroupedByClient,
-  DailyConsumption,
   TerminalNode,
 } from "@/components/Types";
 export async function GET(req: NextRequest) {

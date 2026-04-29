@@ -34,6 +34,7 @@ yarn-error.log*
 .env*
 /data/
 /src/data/
+public/data/*
 # vercel
 .vercel
 

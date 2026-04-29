@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { DialogScrollableContent } from "../DialogScrollableContent";
-import { formatBytes, monthNames } from "@/lib/utils";
+import { formatBytes } from "@/lib/utils";
 import { ChevronDown, ChevronUp, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";

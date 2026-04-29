@@ -7,13 +7,13 @@ import {
   DailyConsumption,
   TerminalNode,
 } from "@/components/Types";
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, useRef, useEffect } from "react";
 import * as XLSX from "xlsx";
 import BandwidthChart from "../../components/BandwidthChart";
 import Consumption from "@/components/Consumption";
 import { DatePickerInput } from "@/components/DatePickerInput";
 import { getEndOfMonth, getStartOfMonth } from "@/lib/utils";
-import { Download, RefreshCcw, RefreshCw } from "lucide-react";
+import { Download, Loader2, RefreshCcw, RefreshCw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -23,11 +23,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import TerminalTable from "@/components/tables/TerminalTable";
-import rawData from "@/data/terminal_nodes.json";
-import consumpData from "@/data/consumption_data.json";
 export default function Dashboard() {
-  const data = Array.isArray(rawData) ? rawData : [];
-  const data2 = Array.isArray(consumpData) ? consumpData : [];
+  const [data, setData] = useState<TerminalNode[]>([])
+  const [data2, setData2] = useState<ConsumptionGroupedByClient[]>([])
   const [usage, setUsage] = useState<ConsumptionLog>({
     cityId: "",
     cityName: "",
@@ -220,9 +218,46 @@ export default function Dashboard() {
       console.error("Request failed:", err);
     }
   };
+  const hasMountedRef = useRef<boolean>(false)
+  const [fetchLoading, setFetchLoading] = useState<boolean>(false)
+  const fetchTermConsumpData = async () => {
+    try {
+      setFetchLoading(true);
+
+      const [res1, res2] = await Promise.all([
+        fetch("/data/terminal_nodes.json"),
+        fetch("/data/consumption_data.json"),
+      ]);
+
+      const [data1, data2] = await Promise.all([
+        res1.json(),
+        res2.json(),
+      ]);
+
+      setData(data1);
+      setData2(data2);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setFetchLoading(false);
+      hasMountedRef.current = true
+    }
+  };
+  useEffect(() => {
+    if (hasMountedRef.current) return
+    fetchTermConsumpData()
+  })
   return (
     // bg-gradient-to-br from-slate-100 via-gray-100 to-slate-100
     <div className="w-full min-h-screen font-lexend text-gray-900 antialiased">
+      {fetchLoading && (
+        <div className="absolute inset-0 bg-black/30 z-50 flex items-center justify-center backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-3 text-white">
+            <Loader2 className="w-8 h-8 animate-spin" />
+            <p className="text-sm">Loading data...</p>
+          </div>
+        </div>
+      )}
       {/* Ambient background decoration */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-slate-100/40 rounded-full blur-3xl" />

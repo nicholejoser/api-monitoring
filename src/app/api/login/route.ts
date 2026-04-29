@@ -1,9 +1,5 @@
 import { NextResponse } from 'next/server';
-import https from 'https';
 export const runtime = 'nodejs'; 
-const agent = new https.Agent({
-  rejectUnauthorized: false,
-});
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 

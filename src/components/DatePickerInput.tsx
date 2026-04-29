@@ -10,7 +10,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Field, FieldLabel } from "./ui/field";
+import { Field } from "./ui/field";
 import {
   InputGroup,
   InputGroupAddon,
