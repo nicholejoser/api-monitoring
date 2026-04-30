@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import fs from "fs";
 import path from "path";
-import { Users } from '../../../components/Types';
+import { User } from '../../../components/Types';
 export const runtime = 'nodejs';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
@@ -18,7 +18,7 @@ export async function POST(req: NextRequest) {
     const filePath = path.join(process.cwd(), "public", "data", "users.json");
 
     const fileData = fs.readFileSync(filePath, "utf-8");
-    const users: Users[] = JSON.parse(fileData);
+    const users: User[] = JSON.parse(fileData);
 
     const { email, password } = await req.json();
 

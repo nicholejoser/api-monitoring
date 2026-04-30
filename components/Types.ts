@@ -129,8 +129,10 @@ export interface TerminalNode {
   wifi: boolean;
 }
 
-export interface Users {
+export interface User {
   id: string;
+  name: string;
+  role: string;
   email: string;
   password: string;
 }

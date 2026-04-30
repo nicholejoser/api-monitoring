@@ -18,7 +18,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/request?type=login", {
+      const res = await fetch("/api/requests?type=login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -43,7 +43,7 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-300">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-100 to-slate-300">
       <div className="w-full max-w-md bg-white/80 backdrop-blur-md border border-slate-200 p-8 rounded-2xl shadow-xl">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-800">Welcome Back</h1>
