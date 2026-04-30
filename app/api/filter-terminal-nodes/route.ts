@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { TerminalNode } from "@/components/Types";
 import fs from "fs";
 import path from "path";
+import { TerminalNode } from "../../../components/Types";
 
 export async function GET() {
   try {

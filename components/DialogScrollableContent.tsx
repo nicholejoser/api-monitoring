@@ -1,14 +1,9 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { DailyConsumption } from "./Types";
 import { formatBytes, monthNames } from "../lib/utils";
 import * as XLSX from "xlsx";
 import { Download } from "lucide-react";
 import Consumption from "./Consumption";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 
 type DialogScrollableContentProps = {
   data: DailyConsumption[];
@@ -46,10 +41,7 @@ export function DialogScrollableContent({
   };
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-      <DialogContent
-        className="max-w-300! "
-        aria-describedby={undefined}
-      >
+      <DialogContent className="max-w-300! " aria-describedby={undefined}>
         <DialogHeader>
           <DialogTitle className="font-lexend">
             Consumption for Client ID: {id}
@@ -90,7 +82,9 @@ export function DialogScrollableContent({
                         className="border-t even:bg-slate-100 hover:bg-blue-100"
                       >
                         <td className="p-2">{index + 1}</td>
-                        <td className="p-2 text-nowrap">{row.consumptionDay}</td>
+                        <td className="p-2 text-nowrap">
+                          {row.consumptionDay}
+                        </td>
                         <td className="p-2">{row.up}</td>
                         <td className="p-2">{row.down}</td>
                       </tr>

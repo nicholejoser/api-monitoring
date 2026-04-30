@@ -9,6 +9,9 @@ import {
   Area,
   CartesianGrid,
 } from "recharts";
+
+import { BandwidthData, ChartPoint } from "./Types";
+import { useMemo, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -16,9 +19,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { BandwidthData, ChartPoint } from "./Types";
-import { useMemo, useState } from "react";
+} from "./ui/select";
 function transformData(data: BandwidthData[]): ChartPoint[] {
   const result: ChartPoint[] = [];
 
