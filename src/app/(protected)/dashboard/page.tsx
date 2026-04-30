@@ -241,13 +241,14 @@ export default function Dashboard() {
       console.error(err);
     } finally {
       setFetchLoading(false);
-      hasMountedRef.current = true
       toast.success("Data loaded successfully!")
     }
   };
   useEffect(() => {
     if (hasMountedRef.current) return
     fetchTermConsumpData()
+    hasMountedRef.current = true
+
   })
   return (
     // bg-gradient-to-br from-slate-100 via-gray-100 to-slate-100
