@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { TerminalNode } from "@/components/Types";
+import { TerminalNode } from "../../../components/Types";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);

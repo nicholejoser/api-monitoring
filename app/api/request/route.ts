@@ -1,9 +1,9 @@
-import { Users } from '@/components/Types';
 import { signToken } from '../../../lib/auth';
 import { cookies } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 import fs from "fs";
 import path from "path";
+import { Users } from '../../../components/Types';
 export const runtime = 'nodejs';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";

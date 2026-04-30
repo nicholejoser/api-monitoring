@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import {
-  ConsumptionGroupedByClient,
-  TerminalNode,
-} from "@/components/Types";
+import { ConsumptionGroupedByClient, TerminalNode } from "../../../components/Types";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const reqType = searchParams.get("type");
