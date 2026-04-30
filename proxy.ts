@@ -1,31 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@/lib/auth";
 
 export function proxy(request: NextRequest) {
-  console.log("🔥 PROXY RUNNING:", request.nextUrl.pathname);
+  const foodie = request.cookies.get("WTBkR2VWbFhNVFk9")?.value;
 
-  const token = request.cookies.get("WTBkR2VWbFhNVFk9")?.value;
+  const isLoginPage =
+    request.nextUrl.pathname === "/" ||
+    request.nextUrl.pathname === "/users";
 
-  const isProtectedRoute =
-    request.nextUrl.pathname.startsWith("/dashboard");
+  // allow login page
+  if (isLoginPage) return NextResponse.next();
 
-  if (isProtectedRoute) { 
-    if (!token) {
-      console.log("❌ No token");
-      return NextResponse.redirect(new URL("/", request.url));
-    }
-
-    const verified = verifyToken(token);
-
-    if (!verified) {
-      console.log("❌ Invalid token");
-      return NextResponse.redirect(new URL("/", request.url));
-    }
+  // protect all routes
+  if (!foodie) {
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 };
