@@ -16,11 +16,18 @@ import {
 } from "../ui/select";
 import { DialogScrollableContent } from "../DialogScrollableContent";
 import { formatBytes, getEndOfMonth, getStartOfMonth } from "../../lib/utils";
-import { ChevronDown, ChevronUp, Download } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  Database,
+  DatabaseSearch,
+  DatabaseZapIcon,
+  Download,
+} from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";
 
-export default function TerminalTable({
+export default function NewTerminalTable({
   data,
   consumptionData,
 }: {
@@ -368,7 +375,7 @@ export default function TerminalTable({
 
       {/* 📊 Table */}
       <div className="w-full flex flex-col items-center gap-5">
-        <div className="max-h-169.5 overflow-y-auto border border-slate-300 rounded-lg">
+        <div className="w-full max-h-169.5 overflow-y-auto border border-slate-300 rounded-lg">
           <table className="w-full text-sm">
             <thead className="bg-slate-200 sticky top-0">
               <tr>
@@ -425,8 +432,8 @@ export default function TerminalTable({
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((item, index) => {
-                return (
+              {paginatedData.length > 0 ? (
+                paginatedData.map((item, index) => (
                   <tr
                     key={`${item.id}-${index}`}
                     onClick={() => {
@@ -467,8 +474,27 @@ export default function TerminalTable({
                       </div>
                     </td>
                   </tr>
-                );
-              })}
+                ))
+              ) : (
+                <tr className="border-t border-slate-300">
+                  <td colSpan={10} className="p-6">
+                    <div className="flex flex-col items-center justify-center gap-3 text-center text-slate-500">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+                        <DatabaseSearch className="w-6 h-6 text-slate-400" />
+                      </div>
+
+                      <div>
+                        <p className="text-sm font-semibold text-slate-600">
+                          No Data Found
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          There is currently no fetched data available.
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
 

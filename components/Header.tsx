@@ -1,22 +1,13 @@
 'use client';
 
-import React from 'react';
-import { Search, Bell, MessageSquare} from 'lucide-react';
+import { Search, Bell, MessageSquare, ChevronDown } from 'lucide-react';
 
-interface HeaderProps {
-  title: string;
-  subtitle?: string;
-}
-
-export default function Header({ title, subtitle }: HeaderProps) {
+export default function Header() {
   return (
     <header className="bg-white border-b border-gray-100 px-8 py-4 font-lexend">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
-          {subtitle && <p className="text-gray-500 text-sm mt-1">{subtitle}</p>}
-        </div>
 
+        {/* LEFT SIDE */}
         <div className="flex items-center gap-4">
           {/* Search */}
           <div className="relative">
@@ -40,16 +31,16 @@ export default function Header({ title, subtitle }: HeaderProps) {
             <span className="absolute top-1 right-1 w-2 h-2 bg-primary-500 rounded-full"></span>
           </button>
 
-          {/* Date */}
-          <div className="text-sm text-gray-500 border-l border-gray-200 pl-4">
-            {new Date().toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </div>
         </div>
+        <div className="text-sm text-gray-500">
+          {new Date().toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })}
+        </div>
+
       </div>
     </header>
   );

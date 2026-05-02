@@ -1,9 +1,7 @@
 "use client";
 import { useState, FormEvent, useMemo } from "react";
 import * as XLSX from "xlsx";
-import { DatePickerInput } from "../../../components/DatePickerInput";
 import { getEndOfMonth, getStartOfMonth } from "../../../lib/utils";
-import { RefreshCcw } from "lucide-react";
 
 import {
   BandwidthData,
@@ -11,14 +9,18 @@ import {
   ConsumptionLog,
   DailyConsumption,
 } from "../../../components/Types";
-import TerminalTable from "@/components/tables/TerminalTable";
 import Loading from "@/components/Loading";
 import MetricsCard from "@/components/MetricsCard";
 import { useData } from "@/context/DataContext";
 import UsageChart from "@/components/UsageCharts";
 export default function Dashboard() {
-  const { terminalNodeData, consumptionGroupData, isLoading, setIsLoading } =
-    useData();
+  const {
+    terminalNodeData,
+    consumptionGroupData,
+    isLoading,
+    fvKill,
+    setIsLoading,
+  } = useData();
   const [usage, setUsage] = useState<ConsumptionLog>({
     cityId: "",
     cityName: "",
@@ -48,7 +50,6 @@ export default function Dashboard() {
     getStartOfMonth(),
   );
   const [endDate, setEndDate] = useState<Date | undefined>(getEndOfMonth());
-  const [isToken, setIsToken] = useState<string>("");
   const [nodeInput, setNodeInput] = useState<string>("89833");
   const [activeNodeId, setActiveNodeId] = useState<string>("89833");
   async function fetchUsage(id: string) {
@@ -56,7 +57,7 @@ export default function Dashboard() {
     try {
       // 3. CRITICAL FIX: We must use the proxy here to avoid the CORS error!
       // Your proxy route will handle hitting the 110.93.79.226 IP securely.
-      const res = await fetch(`/api/proxy?id=${id}&token=${isToken}`);
+      const res = await fetch(`/api/proxy?id=${id}&token=${fvKill}`);
 
       if (!res.ok) {
         throw new Error(`Error: ${res.status}`);
@@ -141,7 +142,7 @@ export default function Dashboard() {
   const handleBandwidth = async () => {
     try {
       const res = await fetch(
-        `/api/bandwidth?id=${nodeInput.trim()}&token=${isToken}`,
+        `/api/bandwidth?id=${nodeInput.trim()}&token=${fvKill}`,
       );
 
       const data = await res.json();
@@ -153,7 +154,7 @@ export default function Dashboard() {
   const handleConsumption = async () => {
     try {
       const res = await fetch(
-        `/api/consumption?id=${nodeInput.trim()}&token=${isToken}&type=single&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
+        `/api/consumption?id=${nodeInput.trim()}&token=${fvKill}&type=single&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
       );
 
       const data = await res.json();
@@ -163,30 +164,29 @@ export default function Dashboard() {
     }
   };
 
-  const handleLogin = async () => {
-    setIsLoading(true); // Start loading spinner
+  // const handleLogin = async () => {
+  //   setIsLoading(true); // Start loading spinner
 
-    try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-      });
+  //   try {
+  //     const response = await fetch("/api/login", {
+  //       method: "POST",
+  //     });
 
-      const result = await response.json();
+  //     const result = await response.json();
 
-      if (response.ok) {
-        setIsToken(result.token.id);
-      } else {
-        console.error("❌ Login failed:", result);
-      }
-    } catch (error) {
-      console.error("Network error:", error);
-    } finally {
-      setIsLoading(false); // Stop loading spinner regardless of success or failure
-    }
-  };
+  //     if (response.ok) {
+  //     } else {
+  //       console.error("❌ Login failed:", result);
+  //     }
+  //   } catch (error) {
+  //     console.error("Network error:", error);
+  //   } finally {
+  //     setIsLoading(false); // Stop loading spinner regardless of success or failure
+  //   }
+  // };
   const handleTerminalNode = async () => {
     try {
-      const res = await fetch(`/api/terminalnodes?token=${isToken}`);
+      const res = await fetch(`/api/terminalnodes?token=${fvKill}`);
       if (!res.ok) {
         throw new Error(`Request failed: ${res.status}`);
       }
@@ -198,7 +198,7 @@ export default function Dashboard() {
     setIsLoading(true);
     try {
       const res = await fetch(
-        `/api/consumption?id=${nodeInput.trim()}&token=${isToken}&type=multiple&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
+        `/api/consumption?id=${nodeInput.trim()}&token=${fvKill}&type=multiple&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
       );
 
       if (!res.ok) {
@@ -209,165 +209,65 @@ export default function Dashboard() {
       console.error("Request failed:", err);
     }
   };
-const topClient = useMemo(() => {
-  if (!consumptionGroupData.length) return null;
+  const topClient = useMemo(() => {
+    if (!consumptionGroupData.length) return null;
 
-  return [...consumptionGroupData]
-    .map((client) => {
-      const totalUsage = client.data.reduce((sum, day) => {
-        return (
-          sum +
-          Number(day.up ?? 0) +
-          Number(day.down ?? 0)
-        );
-      }, 0);
+    return [...consumptionGroupData]
+      .map((client) => {
+        const totalUsage = client.data.reduce((sum, day) => {
+          return sum + Number(day.up ?? 0) + Number(day.down ?? 0);
+        }, 0);
 
-      return { ...client, totalUsage };
-    })
-    .sort((a, b) => b.totalUsage - a.totalUsage)[0];
-}, [consumptionGroupData]);
+        return { ...client, totalUsage };
+      })
+      .sort((a, b) => b.totalUsage - a.totalUsage)[0];
+  }, [consumptionGroupData]);
   return (
     // bg-gradient-to-br from-slate-100 via-gray-100 to-slate-100
-   <>
-  {isLoading && <Loading />}
+    <div className="flex flex-col gap-5 font-lexend text-sm">
+      {isLoading && <Loading />}
 
-  {/* Metrics */}
-  <MetricsCard />
+      {/* Metrics */}
 
-  {/* Dashboard Content */}
-  <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-
-    {/* LEFT SIDE - Main Content */}
-    <div className="xl:col-span-3 space-y-6">
-
-      {/* Header Panel */}
-      <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-white/60 overflow-hidden">
-<UsageChart data={topClient?.data ?? []} />
-        {/* Top Bar */}
-        <div className="bg-linear-to-r from-slate-700 via-slate-800 to-slate-900 px-8 py-6">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white/15 rounded-2xl flex items-center justify-center border border-white/20">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5"
-                    d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                </svg>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-white">
-                  Terminal Node
-                </h1>
-                <p className="text-slate-300 text-sm">
-                  Manage and analyze terminal nodes
-                </p>
-              </div>
-            </div>
-
-            {/* Search Section */}
-            <div className="flex gap-3 w-full lg:w-auto">
-              <input
-                type="text"
-                placeholder="Search node..."
-                className="px-4 py-2 rounded-xl bg-white/90 text-sm focus:outline-none focus:ring-2 focus:ring-slate-400 w-full lg:w-60"
-              />
-
-              <button
-                onClick={handleTerminalNode}
-                disabled={!isToken}
-                className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg flex items-center gap-2
-                  ${isToken
-                    ? "bg-white hover:bg-gray-50 text-slate-700"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                  }`}
-              >
-                <RefreshCcw className="w-4 h-4" />
-                Fetch Data
-              </button>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Table Section */}
-        <div className="p-6 space-y-6">
-
-          <TerminalTable
-            data={terminalNodeData}
-            consumptionData={consumptionGroupData}
+      {/* Dashboard Content */}
+      <MetricsCard
+        terminalNodeNum={terminalNodeData.length}
+        consumptionNum={consumptionGroupData.length}
+        data={topClient?.data ?? []}
+      />
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        {/* LEFT SIDE - Main Content */}
+        <div className="xl:col-span-3 space-y-6">
+          {/* Header Panel */}
+          <UsageChart
+            data={topClient?.data ?? []}
+            terminalNodeData={terminalNodeData}
           />
+        </div>
+        {/* RIGHT SIDE - Analytics Panel */}
+        <div className="h-fit space-y-6">
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
+              Recent Activity
+            </h3>
 
-          {/* Date + Fetch Section */}
-          <div className="flex flex-wrap items-center gap-4">
-
-            <DatePickerInput date={startDate} setDate={setStartDate} />
-            <DatePickerInput date={endDate} setDate={setEndDate} />
-
-            <button
-              onClick={handleConsMultiple}
-              disabled={isLoading || !isToken}
-              className="bg-slate-600 hover:bg-slate-800 text-white font-semibold py-2 px-6 rounded-xl transition-all disabled:opacity-50 flex items-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <RefreshCcw className="w-4 h-4 animate-spin" />
-                  Fetching...
-                </>
-              ) : (
-                "Fetch Consumption Logs"
-              )}
-            </button>
-
+            <ul className="space-y-3 text-sm">
+              <li className="flex justify-between">
+                <span>Data synced</span>
+                <span className="text-gray-400 text-xs">2 min ago</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Node updated</span>
+                <span className="text-gray-400 text-xs">10 min ago</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Consumption fetched</span>
+                <span className="text-gray-400 text-xs">1 hour ago</span>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
-
-    {/* RIGHT SIDE - Analytics Panel */}
-    <div className="space-y-6">
-
-      {/* Quick Stats Card */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-          Node Summary
-        </h3>
-
-        <div className="mt-4 space-y-4">
-          <div className="flex justify-between text-sm">
-            <span>Total Nodes</span>
-            <span className="font-bold">{terminalNodeData.length}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Consumption Records</span>
-            <span className="font-bold">{consumptionGroupData.length}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Activity Timeline */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">
-          Recent Activity
-        </h3>
-
-        <ul className="space-y-3 text-sm">
-          <li className="flex justify-between">
-            <span>Data synced</span>
-            <span className="text-gray-400 text-xs">2 min ago</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Node updated</span>
-            <span className="text-gray-400 text-xs">10 min ago</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Consumption fetched</span>
-            <span className="text-gray-400 text-xs">1 hour ago</span>
-          </li>
-        </ul>
-      </div>
-
-    </div>
-  </div>
-</>
   );
 }

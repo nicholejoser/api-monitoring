@@ -74,26 +74,26 @@ export default function Consumption({ data }: { data: DailyConsumption[] }) {
     <div className="w-full h-100">
       <div className="flex flex-row items-center justify-end">
         <Select defaultValue="2" value={gridType} onValueChange={setGridType}>
-          <SelectTrigger className="w-30 h-11! bg-white border-slate-200 text-slate-500">
+          <SelectTrigger className="w-26 h-11! bg-white border-slate-200 text-slate-500 text-xs cursor-pointer">
             <SelectValue />
           </SelectTrigger>
           <SelectContent position="popper" className="bg-white">
             <SelectGroup>
               <SelectItem
                 value="0"
-                className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
+                className="text-xs text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
               >
                 All
               </SelectItem>
               <SelectItem
                 value="1"
-                className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
+                className="text-xs text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
               >
                 Vertical
               </SelectItem>
               <SelectItem
                 value="2"
-                className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
+                className="text-xs text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
               >
                 Horizontal
               </SelectItem>

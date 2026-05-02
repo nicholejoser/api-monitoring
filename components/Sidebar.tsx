@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -24,6 +24,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useData } from "@/context/DataContext";
 
 export const menuItems = [
   {
@@ -39,7 +40,7 @@ export const menuItems = [
       {
         name: "Node Overview",
         icon: BarChart, // Or a more specific icon
-        href: "/terminal-nodes/all", // Page to view all node data
+        href: "/terminal-nodes", // Page to view all node data
       },
       {
         name: "Find by Client",
@@ -48,28 +49,13 @@ export const menuItems = [
       },
     ],
   },
-  {
-    name: "Consumption",
-    icon: Gauge, // Main icon for the category
-    href: "/#", // Parent link
-    subMenu: [
-      {
-        name: "Consumption Overview",
-        icon: BarChart,
-        href: "/#", // Page to view all consumption data
-      },
-      {
-        name: "Find by Client",
-        icon: Search,
-        href: "/#", // Page to search for a specific client's consumption
-      },
-    ],
-  },
 ];
 interface SidebarProps {
   currentUser: Partial<User> | null;
+  fiberKill: string;
 }
-export default function Sidebar({ currentUser }: SidebarProps) {
+export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
+  const { setFVKill } = useData();
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -94,29 +80,51 @@ export default function Sidebar({ currentUser }: SidebarProps) {
       });
     }
   };
+  useEffect(() => {
+    if (fiberKill) {
+      setFVKill(fiberKill);
+    }
+  }, [fiberKill, setFVKill]);
+
   return (
     <aside
-      className={`${
-        collapsed ? "w-20" : "w-72"
-      } bg-gray-900 min-h-screen flex flex-col transition-all duration-300 ease-in-out relative font-lexend`}
+      className={`
+    ${collapsed ? "w-20" : "w-72"}
+    bg-white
+    min-h-screen flex flex-col
+    transition-all duration-300 ease-in-out
+    relative font-lexend
+    border-r border-gray-200
+    overflow-visible text-sm text-slate-700
+  `}
     >
-      {/* Logo Section */}
-      <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-700">
-        <div className="w-10 h-10 bg-primary-600 rounded-xl flex items-center justify-center shrink-0">
-          <Coffee className="w-6 h-6 text-white" />
+      {/* ================= LOGO ================= */}
+      <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-200">
+        <div className="w-10 h-10 bg-linear-to-br from-[#0ea5e9] to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
+          <Coffee className="w-5 h-5 text-white" />
         </div>
+
         {!collapsed && (
           <div>
-            <h1 className="text-white font-bold text-lg leading-tight">DCS</h1>
-            <p className="text-gray-400 text-xs">Data Control System</p>
+            <h1 className=" font-semibold text-lg tracking-wide">DCS</h1>
+            <p className="text-gray-500 text-xs tracking-wide">
+              Admin Dashboard
+            </p>
           </div>
         )}
       </div>
 
-      {/* Collapse Button */}
+      {/* ================= COLLAPSE BUTTON ================= */}
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="absolute -right-3 top-20 w-6 h-6 bg-slate-600 rounded-full flex items-center justify-center text-white hover:bg-slate-700 transition-colors z-10 shadow-lg cursor-pointer"
+        className="
+      absolute -right-3 top-24 w-7 h-7
+      bg-white border border-gray-300
+      rounded-full flex items-center justify-center
+      text-gray-500 hover:text-gray-900 hover:bg-gray-100
+      transition-all shadow-sm cursor-pointer
+      z-10
+    "
       >
         {collapsed ? (
           <ChevronRight className="w-3 h-3" />
@@ -125,14 +133,14 @@ export default function Sidebar({ currentUser }: SidebarProps) {
         )}
       </button>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-4 py-6">
+      {/* ================= NAVIGATION ================= */}
+      <nav className="flex-1 px-3 py-6">
         <p
-          className={`text-gray-500 text-xs font-semibold uppercase tracking-wider mb-4 ${
+          className={`text-gray-400 text-xs font-semibold uppercase tracking-wider mb-4 ${
             collapsed ? "text-center" : "px-4"
           }`}
         >
-          {collapsed ? "•••" : "Main Menu"}
+          {collapsed ? "•••" : ""}
         </p>
 
         <Accordion
@@ -151,29 +159,55 @@ export default function Sidebar({ currentUser }: SidebarProps) {
               pathname === item.href ||
               item.subMenu?.some((sub) => pathname.startsWith(sub.href));
 
-            // 🔹 If NO submenu → render normal link
+            /* ================= NO SUBMENU ================= */
             if (!hasSubMenu) {
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   className={`
-              flex items-center gap-3 px-4 py-3 rounded-lg
-              transition-all duration-200
-              ${
-                isActive
-                  ? "bg-slate-600 text-white"
-                  : "text-gray-300 hover:bg-gray-700 hover:text-white"
-              }
-            `}
+                group flex items-center gap-3
+                ${collapsed ? "justify-center px-0" : "px-2"}
+                py-3 rounded-xl relative
+                transition-all duration-200
+                ${
+                  isActive
+                    ? "bg-indigo-50 text-indigo-600 font-medium"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }
+              `}
                 >
-                  <item.icon className="w-5 h-5 shrink-0" />
-                  {!collapsed && <span>{item.name}</span>}
+                  <div
+                    className={`
+                  flex items-center justify-center rounded-lg shrink-0
+                  ${collapsed ? "w-10 h-10" : "w-9 h-9"}
+                  ${
+                    isActive
+                      ? "bg-indigo-100"
+                      : "bg-gray-100 group-hover:bg-gray-200"
+                  }
+                `}
+                  >
+                    <item.icon
+                      className={`${collapsed ? "w-5 h-5" : "w-4 h-4"}`}
+                    />
+                  </div>
+
+                  {!collapsed && (
+                    <span className="font-semibold text-sm">{item.name}</span>
+                  )}
+
+                  {/* Tooltip */}
+                  {collapsed && (
+                    <span className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-white rounded-md shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+                      {item.name}
+                    </span>
+                  )}
                 </Link>
               );
             }
 
-            // 🔹 If HAS submenu → use Accordion
+            /* ================= WITH SUBMENU ================= */
             return (
               <AccordionItem
                 key={item.name}
@@ -182,23 +216,48 @@ export default function Sidebar({ currentUser }: SidebarProps) {
               >
                 <AccordionTrigger
                   className={`
-              px-4 py-3 rounded-lg hover:no-underline
-              ${
-                isActive
-                  ? "bg-slate-600 text-white"
-                  : "text-gray-300 hover:bg-gray-700 hover:text-white"
-              }
-              ${collapsed ? "justify-center" : ""}
-            `}
+                group flex items-center gap-3
+                ${collapsed ? "justify-center px-0" : "px-2"}
+                py-3 rounded-xl hover:no-underline
+                transition-all duration-200
+                ${
+                  isActive
+                    ? "bg-indigo-50 text-indigo-600 font-medium"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }
+              `}
                 >
-                  <div className="flex items-center gap-3">
-                    <item.icon className="w-5 h-5 shrink-0" />
-                    {!collapsed && <span>{item.name}</span>}
+                  <div
+                    className={`
+                  flex items-center justify-center rounded-lg shrink-0
+                  ${collapsed ? "w-10 h-10" : "w-9 h-9"}
+                  ${
+                    isActive
+                      ? "bg-indigo-100"
+                      : "bg-gray-100 group-hover:bg-gray-200"
+                  }
+                `}
+                  >
+                    <item.icon
+                      className={`${collapsed ? "w-5 h-5" : "w-4 h-4"}`}
+                    />
                   </div>
+
+                  {!collapsed && (
+                    <span className="font-lexend font-semibold text-sm">
+                      {item.name}
+                    </span>
+                  )}
+
+                  {collapsed && (
+                    <span className="absolute left-full ml-3 px-3 py-1.5 bg-gray-900 text-xs text-white rounded-md shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition pointer-events-none z-50">
+                      {item.name}
+                    </span>
+                  )}
                 </AccordionTrigger>
 
                 {!collapsed && (
-                  <AccordionContent className="pl-8 space-y-1">
+                  <AccordionContent className="pl-10 pt-1 space-y-1">
                     {item.subMenu?.map((sub) => {
                       const isSubActive = pathname === sub.href;
 
@@ -207,17 +266,19 @@ export default function Sidebar({ currentUser }: SidebarProps) {
                           key={sub.name}
                           href={sub.href}
                           className={`
-                      flex items-center gap-3 px-3 py-2 rounded-lg text-sm
-                      transition-all duration-200
-                      ${
-                        isSubActive
-                          ? "bg-slate-500 text-white"
-                          : "text-gray-400 hover:bg-gray-700 hover:text-white"
-                      }
-                    `}
+                        flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
+                        transition-all duration-200
+                        ${
+                          isSubActive
+                            ? "bg-indigo-50 text-indigo-600 border-l-2 border-indigo-500"
+                            : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 border-l-2 border-transparent"
+                        }
+                      `}
                         >
-                          <sub.icon className="w-4 h-4 shrink-0" />
-                          <span>{sub.name}</span>
+                          <sub.icon className="w-4 h-4 shrink-0 opacity-70" />
+                          <span className="font-lexend text-sm">
+                            {sub.name}
+                          </span>
                         </Link>
                       );
                     })}
@@ -229,42 +290,38 @@ export default function Sidebar({ currentUser }: SidebarProps) {
         </Accordion>
       </nav>
 
-      {/* Bottom Section */}
-      <div className="px-4 py-4 border-t border-gray-700 space-y-1">
-        <Link
-          href="#"
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 ${collapsed ? "justify-center px-2" : ""}`}
-        >
-          <Settings className="w-5 h-5 shrink-0" />
-          {!collapsed && <span className="font-medium">Settings</span>}
-        </Link>
+      {/* ================= BOTTOM ================= */}
+      <div className="px-4 py-4 border-t border-gray-200">
         <button
-          onClick={() => handleLogout()}
-          className={`flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 w-full cursor-pointer ${collapsed ? "justify-center px-2" : ""}`}
+          onClick={handleLogout}
+          className={`
+        group flex items-center gap-3 px-4 py-3 rounded-xl
+        text-gray-600 hover:bg-red-50 hover:text-red-600
+        transition-all duration-200 w-full cursor-pointer
+        ${collapsed ? "justify-center px-2" : ""}
+      `}
         >
           <LogOut className="w-5 h-5 shrink-0" />
-          {!collapsed && (
-            <span className="font-medium font-lexend">Logout</span>
-          )}
+          {!collapsed && <span>Logout</span>}
         </button>
       </div>
 
-      {/* User Profile */}
+      {/* ================= USER ================= */}
       {!collapsed && (
-        <div className="px-4 py-4 border-t border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-              JS
+        <div className="px-4 py-4 border-t border-gray-200">
+          <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
+            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow">
+              {currentUser?.name?.charAt(0) ?? "U"}
             </div>
+
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">
+              <p className="text-gray-900 text-sm font-medium truncate">
                 {currentUser?.name}
               </p>
-              <p className="text-gray-400 text-xs truncate capitalize">
+              <p className="text-gray-500 text-xs capitalize">
                 {currentUser?.role}
               </p>
             </div>
-            <Bell className="w-4 h-4 text-gray-400 cursor-pointer hover:text-white transition-colors" />
           </div>
         </div>
       )}

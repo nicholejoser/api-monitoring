@@ -5,7 +5,7 @@ import { User } from "@/components/Types";
 
 export async function GET() {
   try {
-    const filePath = path.join(process.cwd(), "data", "users.json");
+    const filePath = path.join(process.cwd(),"public", "data", "users.json");
 
     const users: User[] = JSON.parse(
       fs.readFileSync(filePath, "utf-8")

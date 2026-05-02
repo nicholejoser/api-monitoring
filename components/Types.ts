@@ -130,9 +130,10 @@ export interface TerminalNode {
 }
 
 export interface User {
+  email: string;
   id: string;
   name: string;
-  role: string;
-  email: string;
   password: string;
+  role: string;
+  username:string;
 }

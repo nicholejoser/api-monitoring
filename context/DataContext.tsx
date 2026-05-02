@@ -16,6 +16,8 @@ interface DataContextType {
   isLoading: boolean;
   refreshData: () => Promise<void>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  fvKill: string;
+  setFVKill: React.Dispatch<React.SetStateAction<string>>
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -25,9 +27,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [consumptionGroupData, setConsumptionGroupData] = useState<
     ConsumptionGroupedByClient[]
   >([]);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const hasFetchedRef = useRef(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [fvKill, setFVKill] = useState<string>("")
+  const hasFetchedRef = useRef<boolean>(false);
 
   const fetchData = async () => {
     try {
@@ -67,6 +69,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         isLoading,
         setIsLoading,
         refreshData: fetchData,
+        fvKill,
+        setFVKill
       }}
     >
       {children}

@@ -35,4 +35,29 @@ export const monthNames = [
   "November",
   "December",
 ];
+//formatting number
+export function formatNumber(value: number) {
+  return new Intl.NumberFormat("en-US").format(value);
+}
+// formatting number with decimals
+export function formatNumberDecimal(value: number) {
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
 
+export let jobProgress = 0;
+export let isRunning = false;
+
+export function setRunning(value: boolean) {
+  isRunning = value;
+}
+
+export function incrementProgress(amount: number) {
+  jobProgress += amount;
+}
+
+export function resetProgress() {
+  jobProgress = 0;
+}
