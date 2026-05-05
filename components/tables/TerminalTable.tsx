@@ -15,18 +15,28 @@ import {
   SelectValue,
 } from "../ui/select";
 import { DialogScrollableContent } from "../DialogScrollableContent";
-import { formatBytes, getEndOfMonth, getStartOfMonth } from "../../lib/utils";
-import { ChevronDown, ChevronUp, Download } from "lucide-react";
+import { formatBytes } from "../../lib/utils";
+import { ChevronDown, ChevronUp, DatabaseSearch, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";
-
-export default function TerminalTable({
-  data,
-  consumptionData,
-}: {
-  data: TerminalNode[];
+interface TerminalTableProps {
+  terminalNodedata: TerminalNode[];
   consumptionData: ConsumptionGroupedByClient[];
-}) {
+  selectedDate?: string | null;
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+}
+export default function TerminalTable({
+  terminalNodedata,
+  consumptionData,
+  selectedDate,
+  startDate,
+  endDate,
+  setStartDate,
+  setEndDate,
+}: TerminalTableProps) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -34,14 +44,15 @@ export default function TerminalTable({
   const [packageFilter, setPackageFilter] = useState<string>("all");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    getStartOfMonth(),
-  );
-  const [endDate, setEndDate] = useState<Date | undefined>(getEndOfMonth());
+
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: "asc" | "desc";
   } | null>(null);
+  const normalizeDate = (date: Date) => {
+    const d = new Date(date);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  };
   const consumptionMap = useMemo(() => {
     const map: Record<number, DailyConsumption[]> = {};
 
@@ -53,7 +64,7 @@ export default function TerminalTable({
   }, [consumptionData]);
   // 🔍 Filtered data
   const filteredData = useMemo(() => {
-    return data.filter((item) => {
+    return terminalNodedata.filter((item) => {
       const matchSearch = `${item.clientName} ${item.cityName} ${item.status}`
         .toLowerCase()
         .includes(search.toLowerCase());
@@ -68,18 +79,28 @@ export default function TerminalTable({
 
       return matchSearch && matchStatus && matchPackage;
     });
-  }, [data, search, statusFilter, packageFilter]);
+  }, [terminalNodedata, search, statusFilter, packageFilter]);
   const enrichedData = useMemo(() => {
     return filteredData.map((item) => {
       const clientConsumption = consumptionMap[item.clientId] || [];
-
       const filteredConsumption = clientConsumption.filter((row) => {
-        if (!startDate && !endDate) return true;
+        const rowDate = normalizeDate(new Date(row.consumptionDay));
 
-        const rowDate = new Date(row.consumptionDay);
+        if (selectedDate) {
+          const selected = new Date(selectedDate);
+          if (
+            rowDate.getFullYear() !== selected.getFullYear() ||
+            rowDate.getMonth() !== selected.getMonth()
+          ) {
+            return false;
+          }
+        }
 
-        if (startDate && rowDate < startDate) return false;
-        if (endDate && rowDate > endDate) return false;
+        const start = startDate ? normalizeDate(startDate) : null;
+        const end = endDate ? normalizeDate(endDate) : null;
+
+        if (start && rowDate < start) return false;
+        if (end && rowDate > end) return false;
 
         return true;
       });
@@ -93,14 +114,14 @@ export default function TerminalTable({
         (sum, row) => sum + Number(row.down),
         0,
       );
-
       return {
         ...item,
         totalUp,
         totalDown,
       };
     });
-  }, [filteredData, consumptionMap, startDate, endDate]);
+  }, [filteredData, consumptionMap, selectedDate, startDate, endDate]);
+
   const sortData = <T,>(
     array: T[],
     key: keyof T,
@@ -127,7 +148,9 @@ export default function TerminalTable({
   //     return filteredData.slice(start, start + limit);
   //   }, [filteredData, page, limit]);
   const totalPages =
-    limit === data.length ? 1 : Math.ceil(filteredData.length / limit);
+    limit === terminalNodedata.length
+      ? 1
+      : Math.ceil(filteredData.length / limit);
   const start = (page - 1) * limit;
 
   const sortedData = useMemo(() => {
@@ -141,7 +164,9 @@ export default function TerminalTable({
   }, [enrichedData, sortConfig]);
 
   const paginatedData =
-    limit === data.length ? sortedData : sortedData.slice(start, start + limit);
+    limit === terminalNodedata.length
+      ? sortedData
+      : sortedData.slice(start, start + limit);
   const selectedConsumption = selectedClientId
     ? consumptionMap[selectedClientId] || []
     : [];
@@ -177,7 +202,7 @@ export default function TerminalTable({
       <div className="w-full flex flex-row items-center justify-end gap-3 pb-3">
         <button
           onClick={handleExportTable}
-          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
+          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-3 rounded-md text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
         >
           <Download className="w-5 h-5 shrink-0" />
           Export to Excel
@@ -204,7 +229,7 @@ export default function TerminalTable({
           <Select
             value={String(limit)}
             onValueChange={(e) => {
-              setLimit(e === "all" ? data.length : Number(e));
+              setLimit(e === "all" ? terminalNodedata.length : Number(e));
               setPage(1);
             }}
           >
@@ -295,22 +320,16 @@ export default function TerminalTable({
                   Suspended
                 </SelectItem>
                 <SelectItem
-                  value="Active"
-                  className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
-                >
-                  Active
-                </SelectItem>
-                <SelectItem
                   value="Connected"
                   className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
                 >
                   Connected
                 </SelectItem>
                 <SelectItem
-                  value="Inactive"
+                  value="Terminated"
                   className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
                 >
-                  Inactive
+                  Terminated
                 </SelectItem>
               </SelectGroup>
             </SelectContent>
@@ -368,7 +387,7 @@ export default function TerminalTable({
 
       {/* 📊 Table */}
       <div className="w-full flex flex-col items-center gap-5">
-        <div className="max-h-169.5 overflow-y-auto border border-slate-300 rounded-lg">
+        <div className="w-full max-h-169.5 overflow-y-auto border border-slate-300 rounded-lg">
           <table className="w-full text-sm">
             <thead className="bg-slate-200 sticky top-0">
               <tr>
@@ -425,50 +444,71 @@ export default function TerminalTable({
               </tr>
             </thead>
             <tbody>
-              {paginatedData.map((item, index) => {
-                return (
-                  <tr
-                    key={`${item.id}-${index}`}
-                    onClick={() => {
-                      setSelectedClientId(item.clientId);
-                      setOpenDialog(true);
-                    }}
-                    className="border-t border-t-slate-300 even:bg-slate-100 hover:bg-blue-100 cursor-pointer"
-                  >
-                    <td className="p-2"> {(page - 1) * limit + index + 1}</td>
-                    <td className="p-2">{item.clientId}</td>
-                    <td className="p-2">{item.clientName}</td>
-                    <td className="p-2">{item.cityName}</td>
-                    <td className="p-2">
-                      {item.status === "Suspended" ? (
-                        <div className="px-2 py-1 rounded border border-red-500 bg-red-500/10 text-red-600 text-sm inline-block">
-                          Suspended
+              {paginatedData.length > 0 ? (
+                paginatedData.map((item, index) => {
+                  return (
+                    <tr
+                      key={`${item.id}-${index}`}
+                      onClick={() => {
+                        setSelectedClientId(item.clientId);
+                        setOpenDialog(true);
+                      }}
+                      className="border-t border-t-slate-300 even:bg-slate-100 hover:bg-blue-100 cursor-pointer"
+                    >
+                      <td className="p-2"> {(page - 1) * limit + index + 1}</td>
+                      <td className="p-2">{item.clientId}</td>
+                      <td className="p-2">{item.clientName}</td>
+                      <td className="p-2">{item.cityName}</td>
+                      <td className="p-2">
+                        {item.status === "Suspended" ? (
+                          <div className="px-2 py-1 rounded border border-red-500 bg-red-500/10 text-red-600 text-sm inline-block">
+                            Suspended
+                          </div>
+                        ) : (
+                          <div className="px-2 py-1 rounded border border-green-500 bg-green-500/10 text-green-600 text-sm inline-block">
+                            Connected
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-2 text-nowrap">{item.packageName}</td>
+                      <td className="p-2 text-nowrap">{item.oltName}</td>
+                      <td className="p-2">{item.serialNumber}</td>
+                      <td className="p-2">
+                        {formatBytes(item.totalUp)}
+                        <div className="text-xs text-slate-500">
+                          {item.totalUp.toLocaleString()} bytes
                         </div>
-                      ) : (
-                        <div className="px-2 py-1 rounded border border-green-500 bg-green-500/10 text-green-600 text-sm inline-block">
-                          Connected
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-2 text-nowrap">{item.packageName}</td>
-                    <td className="p-2 text-nowrap">{item.oltName}</td>
-                    <td className="p-2">{item.serialNumber}</td>
-                    <td className="p-2">
-                      {formatBytes(item.totalUp)}
-                      <div className="text-xs text-slate-500">
-                        {item.totalUp.toLocaleString()} bytes
-                      </div>
-                    </td>
+                      </td>
 
-                    <td className="p-2">
-                      {formatBytes(item.totalDown)}
-                      <div className="text-xs text-slate-500">
-                        {item.totalDown.toLocaleString()} bytes
+                      <td className="p-2">
+                        {formatBytes(item.totalDown)}
+                        <div className="text-xs text-slate-500">
+                          {item.totalDown.toLocaleString()} bytes
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              ) : (
+                <tr className="border-t border-slate-300">
+                  <td colSpan={10} className="p-6">
+                    <div className="flex flex-col items-center justify-center gap-3 text-center text-slate-500">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
+                        <DatabaseSearch className="w-6 h-6 text-slate-400" />
                       </div>
-                    </td>
-                  </tr>
-                );
-              })}
+
+                      <div>
+                        <p className="text-sm font-semibold text-slate-600">
+                          No Data Found
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          There is currently no fetched data available.
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
 

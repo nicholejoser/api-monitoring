@@ -1,26 +1,27 @@
 "use client";
 import BreadCrumb from "@/components/BreadCrumb";
-import Breadcrumb from "@/components/BreadCrumb";
 import { DatePickerInput } from "@/components/DatePickerInput";
 import Loading from "@/components/Loading";
 import TerminalTable from "@/components/tables/TerminalTable";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import TerminalNodesList from "@/components/TerminalNodesList";
+
 import { useData } from "@/context/DataContext";
 import { getEndOfMonth, getStartOfMonth } from "@/lib/utils";
 import { RefreshCcw, Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function TerminalNodesAll() {
-  const { terminalNodeData, consumptionGroupData, isLoading, fvKill } =
-    useData();
+  const {
+    terminalNodeData,
+    consumptionGroupData,
+    isLoading,
+    setIsLoading,
+    setTerminalNodeData,
+    setConsumptionGroupData,
+    fvKill,
+  } = useData();
   const [startDate, setStartDate] = useState<Date | undefined>(
     getStartOfMonth(),
   );
@@ -28,22 +29,6 @@ export default function TerminalNodesAll() {
   const router = useRouter();
   const [files, setFiles] = useState<string[]>([]);
   const [selected, setSelected] = useState<string>("");
-
-  // const handleConsMultiple = async () => {
-  //   setIsLoading(true);
-  //   try {
-  //     const res = await fetch(
-  //       `/api/consumption?id=${nodeInput.trim()}&token=${fvKill}&type=multiple&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
-  //     );
-
-  //     if (!res.ok) {
-  //       throw new Error(`Request failed: ${res.status}`);
-  //     }
-  //     setIsLoading(false);
-  //   } catch (err) {
-  //     console.error("Request failed:", err);
-  //   }
-  // };
 
   useEffect(() => {
     let isMounted = true;
@@ -74,25 +59,8 @@ export default function TerminalNodesAll() {
       {isLoading && <Loading />}
 
       {/* ================= HEADER SECTION ================= */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 px-5">
+      <div className="flex flex-row items-center justify-end gap-4 px-5">
         <BreadCrumb />
-
-        <Select value={selected} onValueChange={setSelected}>
-          <SelectTrigger className="w-72 bg-white border-gray-300 shadow-sm">
-            <SelectValue placeholder="Select data snapshot" />
-          </SelectTrigger>
-
-          <SelectContent
-            position="popper"
-            className="bg-white shadow-lg border border-gray-200"
-          >
-            {files.map((file) => (
-              <SelectItem key={file} value={file}>
-                {file.split("/").pop()}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {/* ================= TERMINAL TABLE CARD ================= */}
@@ -107,7 +75,7 @@ export default function TerminalNodesAll() {
             onClick={() => router.push("/terminal-nodes/settings")}
             disabled={!fvKill}
             className={`
-          px-5 py-2 rounded-lg text-sm font-medium transition-all
+          px-5 py-3 rounded-md text-sm font-medium transition-all
           flex items-center gap-2
           ${
             fvKill
@@ -123,9 +91,25 @@ export default function TerminalNodesAll() {
 
         {/* Table Body */}
         <div className="p-6">
+          <div>
+            <TerminalNodesList
+              files={files}
+              selected={selected}
+              setSelected={setSelected}
+              setIsLoading={setIsLoading}
+              setTerminalNodeData={setTerminalNodeData}
+              setConsumptionGroupData={setConsumptionGroupData}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+            />
+          </div>
           <TerminalTable
-            data={terminalNodeData}
+            terminalNodedata={terminalNodeData}
             consumptionData={consumptionGroupData}
+            startDate={startDate}
+            endDate={endDate}
+            setStartDate={setStartDate}
+            setEndDate={setEndDate}
           />
         </div>
       </div>
@@ -145,7 +129,7 @@ export default function TerminalNodesAll() {
           <button
             disabled={isLoading || !fvKill}
             className={`
-          min-w-[180px] px-6 py-2 rounded-lg text-sm font-medium
+          min-w-45 px-6 py-2 rounded-lg text-sm font-medium
           transition-all flex items-center justify-center gap-2
           ${
             isLoading

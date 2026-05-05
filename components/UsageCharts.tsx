@@ -6,11 +6,13 @@ import Consumption from "./Consumption";
 interface UsageChartProps {
   data: DailyConsumption[];
   terminalNodeData: TerminalNode[];
+  title: string;
 }
 
 export default function UsageChart({
   data,
   terminalNodeData,
+  title,
 }: UsageChartProps) {
   if (!data?.length) {
     return (
@@ -21,33 +23,26 @@ export default function UsageChart({
   }
 
   const clientData = terminalNodeData.find(
-    (a) => a.id === data[0].terminalNodeId
+    (a) => a.id === data[0].terminalNodeId,
   );
 
-  const totalUpload = data.reduce(
-    (sum, d) => sum + Number(d.up ?? 0),
-    0
-  );
+  const totalUpload = data.reduce((sum, d) => sum + Number(d.up ?? 0), 0);
 
-  const totalDownload = data.reduce(
-    (sum, d) => sum + Number(d.down ?? 0),
-    0
-  );
+  const totalDownload = data.reduce((sum, d) => sum + Number(d.down ?? 0), 0);
 
   const formatGB = (bytes: number) =>
     (bytes / 1024 / 1024 / 1024).toFixed(2) + " GB";
 
   return (
     <div className="relative bg-white rounded-3xl p-6 shadow-sm border border-gray-100 overflow-hidden font-lexend">
-
       {/* Gradient Accent */}
-      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-purple-500" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-linear-to-r from-indigo-500 via-violet-500 to-purple-500" />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            Top Client
+            {title}
           </p>
           <h2 className="text-lg font-bold text-gray-800">
             {clientData?.name ?? "Unknown Client"}
@@ -81,7 +76,7 @@ export default function UsageChart({
       </div>
 
       {/* Chart Section */}
-      <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100">
+      <div className="h-100 bg-gray-50 rounded-2xl p-4 border border-gray-100">
         <Consumption data={data} />
       </div>
     </div>

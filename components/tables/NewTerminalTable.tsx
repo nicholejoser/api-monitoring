@@ -16,14 +16,7 @@ import {
 } from "../ui/select";
 import { DialogScrollableContent } from "../DialogScrollableContent";
 import { formatBytes, getEndOfMonth, getStartOfMonth } from "../../lib/utils";
-import {
-  ChevronDown,
-  ChevronUp,
-  Database,
-  DatabaseSearch,
-  DatabaseZapIcon,
-  Download,
-} from "lucide-react";
+import { ChevronDown, ChevronUp, DatabaseSearch, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";
 
@@ -184,7 +177,7 @@ export default function NewTerminalTable({
       <div className="w-full flex flex-row items-center justify-end gap-3 pb-3">
         <button
           onClick={handleExportTable}
-          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-2.5 rounded-xl text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
+          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
         >
           <Download className="w-5 h-5 shrink-0" />
           Export to Excel
@@ -302,22 +295,16 @@ export default function NewTerminalTable({
                   Suspended
                 </SelectItem>
                 <SelectItem
-                  value="Active"
-                  className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
-                >
-                  Active
-                </SelectItem>
-                <SelectItem
                   value="Connected"
                   className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
                 >
                   Connected
                 </SelectItem>
                 <SelectItem
-                  value="Inactive"
+                  value="Terminated"
                   className="text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
                 >
-                  Inactive
+                  Terminated
                 </SelectItem>
               </SelectGroup>
             </SelectContent>

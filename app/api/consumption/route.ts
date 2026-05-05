@@ -1,52 +1,68 @@
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
-import { ConsumptionGroupedByClient, TerminalNode } from "../../../components/Types";
+import {
+  ConsumptionGroupedByClient,
+  TerminalNode,
+} from "../../../components/Types";
+
+import {
+  incrementProgress,
+  isRunning,
+  setRunning,
+  resetProgress,
+} from "../../../lib/utils";
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const reqType = searchParams.get("type");
-  const clientID = searchParams.get("id");
   const token = searchParams.get("token");
   const startDate = searchParams.get("start");
   const endDate = searchParams.get("end");
   // 1. Load terminal nodes file
-  const res = await fetch("/data/filtered_terminal_nodes.json"
+  const filePath = path.join(
+    process.cwd(),
+    "public",
+    "data",
+    "2026-04-02",
+    "filtered_terminal_nodes.json",
   );
 
-  const terminalNodes: TerminalNode[] = await res.json();
-  if (!res.ok) {
-    console.log("%cFailed to fetch terminal node", "color: red")
-    return NextResponse.json({ error: "Invalid client ID" }, { status: 500 });
-  }
-  if (!clientID || isNaN(Number(clientID))) {
-    return NextResponse.json({ error: "Invalid client ID" }, { status: 400 });
-  }
+  const raw = fs.readFileSync(filePath, "utf-8");
+  const terminalNodes: TerminalNode[] = JSON.parse(raw);
+
   if (!token) {
     return NextResponse.json({ error: "Missing token" }, { status: 401 });
   }
 
-  const client = terminalNodes.find((a) => a.clientId === Number(clientID))
-
-  if (!client) {
-    console.log("%cClient not found!", "color: red")
-    return
-  }
-  const baseUrl = `https://110.93.79.226/api/fttx/terminal-nodes/${client.id}/consumption-logs`;
-
-  const filter = {
-    order: "consumptionDay ASC",
-    where: {
-      and: [
-        { consumptionDay: { gt: startDate } },
-        { consumptionDay: { lte: endDate } },
-      ],
-    },
-  };
-
-  const url = `${baseUrl}?filter=${encodeURIComponent(JSON.stringify(filter))}`;
-
   try {
     if (reqType === "single") {
+      const clientID = searchParams.get("id");
+
+      if (!clientID || isNaN(Number(clientID))) {
+        return NextResponse.json(
+          { error: "Invalid client ID" },
+          { status: 400 },
+        );
+      }
+      const client = terminalNodes.find((a) => a.clientId === Number(clientID));
+
+      if (!client) {
+        console.log("%cClient not found!", "color: red");
+        return;
+      }
+      const baseUrl = `https://110.93.79.226/api/fttx/terminal-nodes/${client.id}/consumption-logs`;
+
+      const filter = {
+        order: "consumptionDay ASC",
+        where: {
+          and: [
+            { consumptionDay: { gt: startDate } },
+            { consumptionDay: { lte: endDate } },
+          ],
+        },
+      };
+
+      const url = `${baseUrl}?filter=${encodeURIComponent(JSON.stringify(filter))}`;
       const res = await fetch(url, {
         method: "GET",
         headers: {
@@ -67,23 +83,15 @@ export async function GET(req: NextRequest) {
 
       return NextResponse.json(data);
     } else if (reqType === "multiple") {
-
-      // const terminalPath = path.join(
-      //   process.cwd(),
-      //   "src",
-      //   "data",
-      //   "terminal_nodes.json",
-      // );
-
-      // const terminalRaw = fs.readFileSync(terminalPath, "utf-8");
-      // const terminalNodes = JSON.parse(terminalRaw);
-
-      // 2. Filter connected clients
+      if (isRunning) {
+        return NextResponse.json({ message: "Already running" });
+      }
       const connectedClients = terminalNodes.filter((item: TerminalNode) => {
         return item.status?.toLowerCase().trim() === "connected";
       });
       console.log(`Connected clients: ${connectedClients.length}`);
-
+      setRunning(true);
+      resetProgress();
       const results: ConsumptionGroupedByClient[] = [];
 
       // 3. Loop each client
@@ -125,6 +133,8 @@ export async function GET(req: NextRequest) {
             clientId: client.clientId,
             data,
           });
+          incrementProgress(1);
+
           console.log(
             `[FETCH SUCCESS] Client ID: ${clientID} → records: ${data?.length ?? 0}`,
           );
@@ -132,13 +142,15 @@ export async function GET(req: NextRequest) {
 
         await new Promise((r) => setTimeout(r, 50));
       }
+      setRunning(false);
 
       // 4. Save to file
       const outputPath = path.join(
         process.cwd(),
         "public",
         "data",
-        "consumption_data.json"
+        "2026-04-02",
+        "consumption_data2.json",
       );
 
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });
@@ -153,6 +165,7 @@ export async function GET(req: NextRequest) {
     }
   } catch (error) {
     console.error("Proxy GET Error:", error);
+    setRunning(false);
 
     return NextResponse.json(
       { error: "Failed to fetch upstream API" },
@@ -160,3 +173,94 @@ export async function GET(req: NextRequest) {
     );
   }
 }
+
+//   if (isRunning) {
+//     return NextResponse.json({ message: "Already running" });
+//   }
+//   const connectedClients = terminalNodes.filter((item: TerminalNode) => {
+//     return item.status?.toLowerCase().trim() === "connected";
+//   });
+//   console.log(`Connected clients: ${connectedClients.length}`);
+//   setRunning(true);
+//   resetProgress();
+//   const results: ConsumptionGroupedByClient[] = [];
+//   const BATCH_SIZE = 100;
+//   // 3. Loop each client
+//   for (let i = 0; i < connectedClients.length; i += BATCH_SIZE) {
+//     const batch = connectedClients.slice(i, i + BATCH_SIZE);
+
+//     const promises = batch.map(async (client) => {
+//       const clientID = client.clientId;
+//       const terminalNodeId = client.id;
+
+//       const baseUrl = `https://110.93.79.226/api/fttx/terminal-nodes/${terminalNodeId}/consumption-logs`;
+
+//       const filter = {
+//         order: "consumptionDay ASC",
+//         where: {
+//           and: [
+//             { consumptionDay: { gt: startDate } },
+//             { consumptionDay: { lte: endDate } },
+//           ],
+//         },
+//       };
+
+//       const url = `${baseUrl}?filter=${encodeURIComponent(
+//         JSON.stringify(filter),
+//       )}`;
+
+//       try {
+//         const res = await fetch(url, {
+//           headers: {
+//             Authorization: `Bearer ${token}`,
+//             Accept: "application/json",
+//           },
+//           cache: "no-store",
+//         });
+
+//         if (!res.ok) return null;
+
+//         const data = await res.json();
+
+//         incrementProgress(1);
+
+//         return {
+//           clientId: clientID,
+//           data,
+//         };
+//       } catch {
+//         return null;
+//       }
+//     });
+
+//     const batchResults = await Promise.all(promises);
+
+//     const validResults = batchResults.filter(
+//       (item): item is ConsumptionGroupedByClient => item !== null,
+//     );
+
+//     results.push(...validResults);
+//     // Optional small delay between batches
+//     await new Promise((r) => setTimeout(r, 100));
+//   }
+//   setRunning(false);
+
+//   // 4. Save to file
+//   const outputPath = path.join(
+//     process.cwd(),
+//     "public",
+//     "data",
+//     "2026-04-02",
+//     "consumption_data2.json",
+//   );
+
+//   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+
+//   fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
+
+//   return NextResponse.json({
+//     message: "Consumption data saved",
+//     totalClients: connectedClients.length,
+//     totalFetched: results.length,
+//   });
+// }

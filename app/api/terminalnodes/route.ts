@@ -4,7 +4,6 @@ import path from "path";
 import { TerminalNode } from "../../../components/Types";
 
 import {
-  jobProgress,
   incrementProgress,
   isRunning,
   setRunning,

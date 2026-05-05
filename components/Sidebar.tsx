@@ -1,19 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
-  Settings,
   ChevronLeft,
   ChevronRight,
   Coffee,
   LogOut,
-  Bell,
   Server,
   Search,
-  Gauge,
   BarChart,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -31,11 +28,13 @@ export const menuItems = [
     name: "Dashboard",
     icon: LayoutDashboard,
     href: "/dashboard",
+    roles: ["admin", "superadmin"],
   },
   {
     name: "Terminal Nodes",
     icon: Server, // Main icon for the category
     href: "/terminal-nodes", // Parent link can go to the overview
+    roles: ["superadmin"],
     subMenu: [
       {
         name: "Node Overview",
@@ -72,9 +71,7 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
       });
 
       router.push("/");
-    } catch (error) {
-      console.log("Logout error:", error);
-
+    } catch {
       toast.error("Logout failed", {
         id: toastId,
       });
@@ -85,7 +82,9 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
       setFVKill(fiberKill);
     }
   }, [fiberKill, setFVKill]);
-
+  const filteredMenu = menuItems.filter(
+    (item) => !item.roles || item.roles.includes(currentUser?.role ?? ""),
+  );
   return (
     <aside
       className={`
@@ -153,7 +152,7 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
           }
           className="space-y-1"
         >
-          {menuItems.map((item) => {
+          {filteredMenu.map((item) => {
             const hasSubMenu = item.subMenu?.length;
             const isActive =
               pathname === item.href ||

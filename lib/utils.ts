@@ -12,6 +12,14 @@ export function getStartOfMonth(date = new Date()) {
 export function getEndOfMonth(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth() + 1, 0);
 }
+
+export function getStartOfLastMonth(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth() - 1, 1);
+}
+
+export function getEndOfLastMonth(date = new Date()) {
+  return new Date(date.getFullYear(), date.getMonth(), 0);
+}
 export const formatBytes = (bytes: number) => {
   if (bytes === 0) return "0 B";
 
@@ -61,3 +69,18 @@ export function incrementProgress(amount: number) {
 export function resetProgress() {
   jobProgress = 0;
 }
+
+export const formatMonthYear = (file: string) => {
+  // match YYYY-MM-DD from path
+  const match = file.match(/\d{4}-\d{2}-\d{2}/);
+
+  if (!match) return file;
+
+  const date = new Date(match[0]);
+
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    // day: "numeric",
+    year: "numeric",
+  });
+};

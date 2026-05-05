@@ -1,21 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 export function proxy(request: NextRequest) {
-  const foodie = request.cookies.get("WTBkR2VWbFhNVFk9")?.value;
+  const token = request.cookies.get("WTBkR2VWbFhNVFk9")?.value;
+
+  const pathname = request.nextUrl.pathname;
 
   const isLoginPage =
-    request.nextUrl.pathname === "/" ||
-    request.nextUrl.pathname === "/users";
+    pathname === "/" || pathname === "/users";
 
-  // allow login page
+  // ✅ Allow login page
   if (isLoginPage) return NextResponse.next();
 
-  // protect all routes
-  if (!foodie) {
+  // ✅ No token → redirect
+  if (!token) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.next();
+  try {
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET!
+    ) as { role: string };
+
+    // ✅ Admin-only pages
+    if (pathname.startsWith("/admin") && decoded.role !== "admin") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    // ✅ Example: Only admin + manager
+    if (
+      pathname.startsWith("/terminal-nodes") &&
+      !["superadmin"].includes(decoded.role)
+    ) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    return NextResponse.next();
+  } catch {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
 }
 
 export const config = {

@@ -17,7 +17,11 @@ interface DataContextType {
   refreshData: () => Promise<void>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   fvKill: string;
-  setFVKill: React.Dispatch<React.SetStateAction<string>>
+  setFVKill: React.Dispatch<React.SetStateAction<string>>;
+  setTerminalNodeData: React.Dispatch<React.SetStateAction<TerminalNode[]>>;
+  setConsumptionGroupData: React.Dispatch<
+    React.SetStateAction<ConsumptionGroupedByClient[]>
+  >;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -28,7 +32,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     ConsumptionGroupedByClient[]
   >([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [fvKill, setFVKill] = useState<string>("")
+  const [fvKill, setFVKill] = useState<string>("");
   const hasFetchedRef = useRef<boolean>(false);
 
   const fetchData = async () => {
@@ -36,8 +40,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(true);
 
       const [res1, res2] = await Promise.all([
-        fetch("/data/terminal_nodes.json"),
-        fetch("/data/consumption_data.json"),
+        // fetch("/data/terminal_nodes.json"),
+        // fetch("/data/consumption_data.json"),
+        fetch("/data/2026-04-02/filtered_terminal_nodes.json"),
+        fetch("/data/2026-04-02/consumption_data.json"),
       ]);
 
       const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
@@ -70,7 +76,9 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
         setIsLoading,
         refreshData: fetchData,
         fvKill,
-        setFVKill
+        setFVKill,
+        setTerminalNodeData,
+        setConsumptionGroupData,
       }}
     >
       {children}

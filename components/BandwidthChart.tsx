@@ -32,8 +32,8 @@ function transformData(data: BandwidthData[]): ChartPoint[] {
 
       result.push({
         time: date.toISOString(),
-        up: value.up / 1_000_000,
-        down: value.down / 1_000_000,
+        up: value.up,
+        down: value.down,
       });
     });
   });
@@ -42,7 +42,26 @@ function transformData(data: BandwidthData[]): ChartPoint[] {
     (a, b) => new Date(a.time).getTime() - new Date(b.time).getTime(),
   );
 }
+function formatBandwidth(value: number) {
+  if (!value && value !== 0) return "0 B";
 
+  const abs = Math.abs(value);
+
+  if (abs >= 1_000_000_000_000) {
+    return `${(value / 1_000_000_000_000).toFixed(2)} TB`;
+  }
+  if (abs >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toFixed(2)} GB`;
+  }
+  if (abs >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(2)} MB`;
+  }
+  if (abs >= 1_000) {
+    return `${(value / 1_000).toFixed(2)} KB`;
+  }
+
+  return `${value.toFixed(0)} B`;
+}
 export default function BandwidthChart({ data }: { data: BandwidthData[] }) {
   const chartData = transformData(data);
   const [modeType, setModeType] = useState<string>("area");
@@ -163,14 +182,13 @@ export default function BandwidthChart({ data }: { data: BandwidthData[] }) {
                 minTickGap={40}
               />
 
-              <YAxis tickFormatter={(value) => value.toFixed(2)} />
+              <YAxis tickFormatter={(value) => formatBandwidth(value)} />
 
               <Tooltip
                 labelFormatter={(label) => new Date(label).toLocaleString()}
                 formatter={(value, name) => {
                   const num = typeof value === "number" ? value : Number(value);
-
-                  return [`${num.toFixed(2)}`, name as string];
+                  return [formatBandwidth(num), name as string];
                 }}
                 contentStyle={{
                   borderRadius: "12px",
@@ -226,13 +244,13 @@ export default function BandwidthChart({ data }: { data: BandwidthData[] }) {
                 minTickGap={40}
               />
               {/* unit=" Mbps"  */}
-              <YAxis tickFormatter={(value) => value.toFixed(2)} />
+              <YAxis tickFormatter={(value) => formatBandwidth(value)} />
+
               <Tooltip
                 labelFormatter={(label) => new Date(label).toLocaleString()}
                 formatter={(value, name) => {
                   const num = typeof value === "number" ? value : Number(value);
-
-                  return [`${num.toFixed(2)}`, name as string];
+                  return [formatBandwidth(num), name as string];
                 }}
                 contentStyle={{
                   borderRadius: "12px",

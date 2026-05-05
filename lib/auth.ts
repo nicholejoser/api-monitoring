@@ -6,6 +6,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 export interface AuthTokenPayload extends JwtPayload {
   id: string;
   username: string;
+  role: string;
 }
 
 /**
@@ -26,7 +27,7 @@ function getJwtSecret(): string {
  */
 export function signToken(payload: AuthTokenPayload): string {
   return jwt.sign(payload, getJwtSecret(), {
-    expiresIn: "1h",
+    expiresIn: "1d",
   });
 }
 

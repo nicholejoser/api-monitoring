@@ -35,9 +35,6 @@ interface ChartData {
   up: number;
   down: number;
 }
-function toGB(value: number) {
-  return value / (1024 * 1024 * 1024);
-}
 
 // function transformDailyData(data: DailyConsumption[]): ChartData[] {
 //   return data
@@ -59,19 +56,38 @@ function transformDailyData(data: DailyConsumption[]): ChartData[] {
           month: "short",
           day: "2-digit",
         }),
-        up: toGB(Number(item.up)),
-        down: toGB(Number(item.down)),
+        up: Number(item.up),
+        down: Number(item.down),
       };
     })
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 }
+function formatBytesAuto(value: number) {
+  if (!value && value !== 0) return "0 B";
 
+  const abs = Math.abs(value);
+
+  if (abs >= 1_000_000_000_000) {
+    return `${(value / 1_000_000_000_000).toFixed(2)} TB`;
+  }
+  if (abs >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toFixed(2)} GB`;
+  }
+  if (abs >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(2)} MB`;
+  }
+  if (abs >= 1_000) {
+    return `${(value / 1_000).toFixed(2)} KB`;
+  }
+
+  return `${value.toFixed(0)} B`;
+}
 export default function Consumption({ data }: { data: DailyConsumption[] }) {
   const chartData = transformDailyData(data);
   const [gridType, setGridType] = useState<string>("2");
 
   return (
-    <div className="w-full h-100">
+    <div className="w-full h-full">
       <div className="flex flex-row items-center justify-end">
         <Select defaultValue="2" value={gridType} onValueChange={setGridType}>
           <SelectTrigger className="w-26 h-11! bg-white border-slate-200 text-slate-500 text-xs cursor-pointer">
@@ -114,13 +130,12 @@ export default function Consumption({ data }: { data: DailyConsumption[] }) {
 
           <XAxis dataKey="label" interval="preserveStartEnd" minTickGap={20} />
 
-          <YAxis tickFormatter={(value) => `${value.toFixed(0)} GB`} />
+          <YAxis tickFormatter={(value) => formatBytesAuto(value)} />
 
           <Tooltip
             formatter={(value, name) => {
               const num = typeof value === "number" ? value : Number(value);
-
-              return [`${num.toFixed(2)} GB`, name as string];
+              return [formatBytesAuto(num), name as string];
             }}
             labelFormatter={(label, payload) => {
               const item = payload?.[0]?.payload;
@@ -152,8 +167,8 @@ export default function Consumption({ data }: { data: DailyConsumption[] }) {
           {/* <Bar dataKey="up" stackId="a" fill="#7c3aed" name="Up" />
           <Bar dataKey="down" stackId="a" fill="#f59e0b" name="Down" /> */}
           {/* Clean Tech Look */}
-          <Bar dataKey="up" stackId="a" fill="#22c55e" name="Down" />
-          <Bar dataKey="down" stackId="a" fill="#0ea5e9" name="Up" />
+          <Bar dataKey="up" stackId="a" fill="#22c55e" name="Upload" />
+          <Bar dataKey="down" stackId="a" fill="#0ea5e9" name="Download" />
           {/* <Bar dataKey="up" stackId="a" fill="#0ea5e9" name="Up" />
           {/* High Contrast */}
           {/* <Bar dataKey="up" stackId="a" fill="#10b981" name="Up" />

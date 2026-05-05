@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     const token = signToken({
       id: user.id,
       username: user.username,
+      role: user.role,
     });
 
     const cookieStore = await cookies();
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
+      maxAge: 60 * 60 * 24
     });
 
     return NextResponse.json({ message: "Login successful" });

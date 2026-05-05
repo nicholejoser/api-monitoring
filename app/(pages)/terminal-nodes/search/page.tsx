@@ -12,8 +12,10 @@ import React, { FormEvent, useState } from "react";
 import { DatePickerInput } from "@/components/DatePickerInput";
 import Consumption from "@/components/Consumption";
 import BandwidthChart from "@/components/BandwidthChart";
+import { useData } from "@/context/DataContext";
 
 export default function TerminalNodesSearch() {
+  const { fvKill } = useData();
   const [usage, setUsage] = useState<ConsumptionLog>({
     cityId: "",
     cityName: "",
@@ -38,7 +40,6 @@ export default function TerminalNodesSearch() {
   const [consumptionData, setConsumptionData] = useState<DailyConsumption[]>(
     [],
   );
-  const [isToken, setIsToken] = useState("");
   const [loading, setLoading] = useState(false);
   const [nodeInput, setNodeInput] = useState("89833");
   const [activeNodeId, setActiveNodeId] = useState("89833");
@@ -51,7 +52,7 @@ export default function TerminalNodesSearch() {
     try {
       // 3. CRITICAL FIX: We must use the proxy here to avoid the CORS error!
       // Your proxy route will handle hitting the 110.93.79.226 IP securely.
-      const res = await fetch(`/api/proxy?id=${id}&token=${isToken}`);
+      const res = await fetch(`/api/proxy?id=${id}&token=${fvKill}`);
 
       if (!res.ok) {
         throw new Error(`Error: ${res.status}`);
@@ -137,7 +138,7 @@ export default function TerminalNodesSearch() {
   const handleBandwidth = async () => {
     try {
       const res = await fetch(
-        `/api/bandwidth?id=${nodeInput.trim()}&token=${isToken}`,
+        `/api/bandwidth?id=${nodeInput.trim()}&token=${fvKill}`,
       );
 
       const data = await res.json();
@@ -149,7 +150,7 @@ export default function TerminalNodesSearch() {
   const handleConsumption = async () => {
     try {
       const res = await fetch(
-        `/api/consumption?id=${nodeInput.trim()}&token=${isToken}&type=single&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
+        `/api/consumption?id=${nodeInput.trim()}&token=${fvKill}&type=single&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
       );
 
       const data = await res.json();
@@ -233,8 +234,8 @@ export default function TerminalNodesSearch() {
                   </div>
                   <button
                     type="submit"
-                    disabled={!isToken}
-                    className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-black/10 active:scale-[0.97] flex items-center gap-2 ${isToken ? "bg-white hover:bg-gray-50 text-slate-700 cursor-pointer" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+                    disabled={!fvKill}
+                    className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-black/10 active:scale-[0.97] flex items-center gap-2 ${fvKill ? "bg-white hover:bg-gray-50 text-slate-700 cursor-pointer" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
                   >
                     <svg
                       className="w-4 h-4"
@@ -255,7 +256,6 @@ export default function TerminalNodesSearch() {
               </div>
             </div>
           </div>
-          
 
           {/* DATA TABLE */}
           <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg shadow-gray-200/50 border border-white/60 overflow-hidden">

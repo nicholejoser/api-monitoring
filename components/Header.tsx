@@ -1,12 +1,11 @@
-'use client';
+"use client";
 
-import { Search, Bell, MessageSquare, ChevronDown } from 'lucide-react';
+import { Search, Bell, MessageSquare } from "lucide-react";
 
 export default function Header() {
   return (
     <header className="bg-white border-b border-gray-100 px-8 py-4 font-lexend">
       <div className="flex items-center justify-between">
-
         {/* LEFT SIDE */}
         <div className="flex items-center gap-4">
           {/* Search */}
@@ -30,17 +29,15 @@ export default function Header() {
             <MessageSquare className="w-5 h-5 text-gray-500" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-primary-500 rounded-full"></span>
           </button>
-
         </div>
         <div className="text-sm text-gray-500">
-          {new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
+          {new Date().toLocaleDateString("en-US", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
           })}
         </div>
-
       </div>
     </header>
   );

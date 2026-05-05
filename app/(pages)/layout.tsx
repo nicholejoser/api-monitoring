@@ -28,7 +28,6 @@ export default async function DashboardLayout({
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       id: string;
-      username: string;
     };
     const payload = {
       username: "broadband_api",

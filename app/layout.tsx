@@ -3,7 +3,6 @@ import { Lexend, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "../lib/utils";
 import { Toaster } from "sonner";
-import { DataProvider } from "@/context/DataContext";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
