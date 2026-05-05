@@ -5,11 +5,16 @@ import { TerminalNode } from "../../../components/Types";
 
 export async function GET() {
   try {
-    const res = await fetch(
-      "http://localhost:3000/data/terminal_nodes.json"
+    const filePath = path.join(
+      process.cwd(),
+      "public",
+      "data",
+      "2026-04-02",
+      "terminal_nodes_11-59-42.json",
     );
 
-    const data: TerminalNode[] = await res.json();
+    const raw = fs.readFileSync(filePath, "utf-8");
+    const data: TerminalNode[] = JSON.parse(raw);
 
     // STEP 1: ONLY Connected (not suspended, not terminated, etc.)
     const connectedOnly = data.filter((item) => {
@@ -27,14 +32,11 @@ export async function GET() {
       process.cwd(),
       "public",
       "data",
-      "filtered_terminal_nodes.json"
+      "2026-04-02",
+      `filtered_terminal_nodes.json`,
     );
 
-    fs.writeFileSync(
-      outputPath,
-      JSON.stringify(filtered, null, 2),
-      "utf-8"
-    );
+    fs.writeFileSync(outputPath, JSON.stringify(filtered, null, 2), "utf-8");
 
     return NextResponse.json({
       message: "Filtering complete",
@@ -48,7 +50,7 @@ export async function GET() {
     console.error(error);
     return NextResponse.json(
       { error: "Failed to process file" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

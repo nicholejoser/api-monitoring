@@ -129,8 +129,21 @@ export interface TerminalNode {
   wifi: boolean;
 }
 
-export interface Users {
-  id: string;
+export interface User {
   email: string;
+  id: string;
+  name: string;
   password: string;
+  role: string;
+  username: string;
+}
+export interface EnrichedTerminalNode extends TerminalNode {
+  totalUp: number;
+  totalDown: number;
+}
+export interface AnalyticsProps {
+  topUpload: EnrichedTerminalNode[];
+  topDownload: EnrichedTerminalNode[];
+  upload95: number;
+  download95: number;
 }
