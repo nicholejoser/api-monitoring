@@ -4,7 +4,7 @@ import "./globals.css";
 import { cn } from "../lib/utils";
 import { Toaster } from "sonner";
 
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans' });
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const lexend = Lexend({
   variable: "--font-lexend",
@@ -22,11 +22,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("h-full", "antialiased", lexend.variable, "font-sans", geist.variable)}>
+    <html
+      lang="en"
+      className={cn(
+        "h-full",
+        "antialiased",
+        lexend.variable,
+        "font-sans",
+        geist.variable,
+      )}
+    >
       <body className="min-h-full flex flex-col">
-        <main>
-          {children}
-        </main>
+        <main>{children}</main>
         <Toaster position="top-right" richColors />
       </body>
     </html>

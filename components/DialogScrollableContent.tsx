@@ -41,7 +41,10 @@ export function DialogScrollableContent({
   };
   return (
     <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-      <DialogContent className="max-w-300! " aria-describedby={undefined}>
+      <DialogContent
+        className="max-w-300! max-h-screen h-auto overflow-y-auto"
+        aria-describedby={undefined}
+      >
         <DialogHeader>
           <DialogTitle className="font-lexend">
             Consumption for Client ID: {id}
@@ -60,7 +63,7 @@ export function DialogScrollableContent({
           </div>
         </DialogHeader>
 
-        <div className="w-full flex flex-row items-center gap-5 max-h-[50vh] px-4 font-lexend">
+        <div className="w-full b-black flex flex-row items-center gap-5 px-4 font-lexend bg-black p-2">
           <div className="w-150 rounded-lg border border-slate-200 overflow-hidden">
             <div className="max-h-[50vh] overflow-y-auto no-scrollbar">
               {data.length === 0 ? (

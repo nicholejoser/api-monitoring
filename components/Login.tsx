@@ -7,62 +7,62 @@ import { toast } from "sonner";
 export default function Login() {
   const router = useRouter();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setLoading(true);
-
+    const toastID = toast.loading("Signing in..");
     try {
-      const res = await fetch("/api/request?type=login", {
+      const res = await fetch("/api/requests?type=login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, password }),
       });
-
       if (!res.ok) {
-        toast.error("Invalid email or password.");
+        toast.error("Invalid username or password.");
 
         setLoading(false);
         return;
       }
-
+      toast.dismiss(toastID);
       router.push("/dashboard");
       router.refresh();
     } catch {
       toast.error("Something went wrong. Try again.");
     } finally {
+      toast.dismiss(toastID);
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-300">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-100 to-slate-300">
       <div className="w-full max-w-md bg-white/80 backdrop-blur-md border border-slate-200 p-8 rounded-2xl shadow-xl">
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-slate-800">Welcome Back</h1>
-          <p className="text-slate-500 text-sm mt-2">
-            Sign in to continue to your dashboard
-          </p>
+          <p className="text-slate-500 text-sm mt-2 font-semibold">Sign in</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-5">
-          {/* Email */}
+          {/* Username */}
           <div>
-            <label className="text-sm font-medium text-slate-700">Email</label>
+            <label className="text-sm font-medium text-slate-700">
+              Username
+            </label>
             <input
-              type="email"
+              type="username"
               required
               className="w-full mt-1 px-4 py-2.5 bg-slate-50 border border-slate-300 rounded-lg 
                          focus:outline-none focus:ring-2 focus:ring-slate-500"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
           </div>
 

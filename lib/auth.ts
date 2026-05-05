@@ -1,16 +1,42 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+/**
+ * Strongly typed JWT payload
+ */
+export interface AuthTokenPayload extends JwtPayload {
+  id: string;
+  username: string;
+  role: string;
+}
 
-export function signToken(payload: object) {
-  return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: "1h",
+/**
+ * Safely get secret (TypeScript safe)
+ */
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new Error("JWT_SECRET is not defined");
+  }
+
+  return secret;
+}
+
+/**
+ * Sign Token
+ */
+export function signToken(payload: AuthTokenPayload): string {
+  return jwt.sign(payload, getJwtSecret(), {
+    expiresIn: "1d",
   });
 }
 
-export function verifyToken(token: string) {
+/**
+ * Verify Token
+ */
+export function verifyToken(token: string): AuthTokenPayload | null {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    return jwt.verify(token, getJwtSecret()) as AuthTokenPayload;
   } catch {
     return null;
   }

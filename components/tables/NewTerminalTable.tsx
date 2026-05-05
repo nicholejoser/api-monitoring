@@ -15,28 +15,18 @@ import {
   SelectValue,
 } from "../ui/select";
 import { DialogScrollableContent } from "../DialogScrollableContent";
-import { formatBytes } from "../../lib/utils";
+import { formatBytes, getEndOfMonth, getStartOfMonth } from "../../lib/utils";
 import { ChevronDown, ChevronUp, DatabaseSearch, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";
-interface TerminalTableProps {
-  terminalNodedata: TerminalNode[];
-  consumptionData: ConsumptionGroupedByClient[];
-  selectedDate?: string | null;
-  startDate: Date | undefined;
-  endDate: Date | undefined;
-  setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
-  setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
-}
-export default function TerminalTable({
-  terminalNodedata,
+
+export default function NewTerminalTable({
+  data,
   consumptionData,
-  selectedDate,
-  startDate,
-  endDate,
-  setStartDate,
-  setEndDate,
-}: TerminalTableProps) {
+}: {
+  data: TerminalNode[];
+  consumptionData: ConsumptionGroupedByClient[];
+}) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -44,15 +34,14 @@ export default function TerminalTable({
   const [packageFilter, setPackageFilter] = useState<string>("all");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-
+  const [startDate, setStartDate] = useState<Date | undefined>(
+    getStartOfMonth(),
+  );
+  const [endDate, setEndDate] = useState<Date | undefined>(getEndOfMonth());
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: "asc" | "desc";
   } | null>(null);
-  const normalizeDate = (date: Date) => {
-    const d = new Date(date);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  };
   const consumptionMap = useMemo(() => {
     const map: Record<number, DailyConsumption[]> = {};
 
@@ -64,7 +53,7 @@ export default function TerminalTable({
   }, [consumptionData]);
   // 🔍 Filtered data
   const filteredData = useMemo(() => {
-    return terminalNodedata.filter((item) => {
+    return data.filter((item) => {
       const matchSearch = `${item.clientName} ${item.cityName} ${item.status}`
         .toLowerCase()
         .includes(search.toLowerCase());
@@ -79,28 +68,18 @@ export default function TerminalTable({
 
       return matchSearch && matchStatus && matchPackage;
     });
-  }, [terminalNodedata, search, statusFilter, packageFilter]);
+  }, [data, search, statusFilter, packageFilter]);
   const enrichedData = useMemo(() => {
     return filteredData.map((item) => {
       const clientConsumption = consumptionMap[item.clientId] || [];
+
       const filteredConsumption = clientConsumption.filter((row) => {
-        const rowDate = normalizeDate(new Date(row.consumptionDay));
+        if (!startDate && !endDate) return true;
 
-        if (selectedDate) {
-          const selected = new Date(selectedDate);
-          if (
-            rowDate.getFullYear() !== selected.getFullYear() ||
-            rowDate.getMonth() !== selected.getMonth()
-          ) {
-            return false;
-          }
-        }
+        const rowDate = new Date(row.consumptionDay);
 
-        const start = startDate ? normalizeDate(startDate) : null;
-        const end = endDate ? normalizeDate(endDate) : null;
-
-        if (start && rowDate < start) return false;
-        if (end && rowDate > end) return false;
+        if (startDate && rowDate < startDate) return false;
+        if (endDate && rowDate > endDate) return false;
 
         return true;
       });
@@ -114,14 +93,14 @@ export default function TerminalTable({
         (sum, row) => sum + Number(row.down),
         0,
       );
+
       return {
         ...item,
         totalUp,
         totalDown,
       };
     });
-  }, [filteredData, consumptionMap, selectedDate, startDate, endDate]);
-
+  }, [filteredData, consumptionMap, startDate, endDate]);
   const sortData = <T,>(
     array: T[],
     key: keyof T,
@@ -148,9 +127,7 @@ export default function TerminalTable({
   //     return filteredData.slice(start, start + limit);
   //   }, [filteredData, page, limit]);
   const totalPages =
-    limit === terminalNodedata.length
-      ? 1
-      : Math.ceil(filteredData.length / limit);
+    limit === data.length ? 1 : Math.ceil(filteredData.length / limit);
   const start = (page - 1) * limit;
 
   const sortedData = useMemo(() => {
@@ -164,9 +141,7 @@ export default function TerminalTable({
   }, [enrichedData, sortConfig]);
 
   const paginatedData =
-    limit === terminalNodedata.length
-      ? sortedData
-      : sortedData.slice(start, start + limit);
+    limit === data.length ? sortedData : sortedData.slice(start, start + limit);
   const selectedConsumption = selectedClientId
     ? consumptionMap[selectedClientId] || []
     : [];
@@ -202,7 +177,7 @@ export default function TerminalTable({
       <div className="w-full flex flex-row items-center justify-end gap-3 pb-3">
         <button
           onClick={handleExportTable}
-          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-3 rounded-md text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
+          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
         >
           <Download className="w-5 h-5 shrink-0" />
           Export to Excel
@@ -229,7 +204,7 @@ export default function TerminalTable({
           <Select
             value={String(limit)}
             onValueChange={(e) => {
-              setLimit(e === "all" ? terminalNodedata.length : Number(e));
+              setLimit(e === "all" ? data.length : Number(e));
               setPage(1);
             }}
           >
@@ -445,50 +420,48 @@ export default function TerminalTable({
             </thead>
             <tbody>
               {paginatedData.length > 0 ? (
-                paginatedData.map((item, index) => {
-                  return (
-                    <tr
-                      key={`${item.id}-${index}`}
-                      onClick={() => {
-                        setSelectedClientId(item.clientId);
-                        setOpenDialog(true);
-                      }}
-                      className="border-t border-t-slate-300 even:bg-slate-100 hover:bg-blue-100 cursor-pointer"
-                    >
-                      <td className="p-2"> {(page - 1) * limit + index + 1}</td>
-                      <td className="p-2">{item.clientId}</td>
-                      <td className="p-2">{item.clientName}</td>
-                      <td className="p-2">{item.cityName}</td>
-                      <td className="p-2">
-                        {item.status === "Suspended" ? (
-                          <div className="px-2 py-1 rounded border border-red-500 bg-red-500/10 text-red-600 text-sm inline-block">
-                            Suspended
-                          </div>
-                        ) : (
-                          <div className="px-2 py-1 rounded border border-green-500 bg-green-500/10 text-green-600 text-sm inline-block">
-                            Connected
-                          </div>
-                        )}
-                      </td>
-                      <td className="p-2 text-nowrap">{item.packageName}</td>
-                      <td className="p-2 text-nowrap">{item.oltName}</td>
-                      <td className="p-2">{item.serialNumber}</td>
-                      <td className="p-2">
-                        {formatBytes(item.totalUp)}
-                        <div className="text-xs text-slate-500">
-                          {item.totalUp.toLocaleString()} bytes
+                paginatedData.map((item, index) => (
+                  <tr
+                    key={`${item.id}-${index}`}
+                    onClick={() => {
+                      setSelectedClientId(item.clientId);
+                      setOpenDialog(true);
+                    }}
+                    className="border-t border-t-slate-300 even:bg-slate-100 hover:bg-blue-100 cursor-pointer"
+                  >
+                    <td className="p-2"> {(page - 1) * limit + index + 1}</td>
+                    <td className="p-2">{item.clientId}</td>
+                    <td className="p-2">{item.clientName}</td>
+                    <td className="p-2">{item.cityName}</td>
+                    <td className="p-2">
+                      {item.status === "Suspended" ? (
+                        <div className="px-2 py-1 rounded border border-red-500 bg-red-500/10 text-red-600 text-sm inline-block">
+                          Suspended
                         </div>
-                      </td>
+                      ) : (
+                        <div className="px-2 py-1 rounded border border-green-500 bg-green-500/10 text-green-600 text-sm inline-block">
+                          Connected
+                        </div>
+                      )}
+                    </td>
+                    <td className="p-2 text-nowrap">{item.packageName}</td>
+                    <td className="p-2 text-nowrap">{item.oltName}</td>
+                    <td className="p-2">{item.serialNumber}</td>
+                    <td className="p-2">
+                      {formatBytes(item.totalUp)}
+                      <div className="text-xs text-slate-500">
+                        {item.totalUp.toLocaleString()} bytes
+                      </div>
+                    </td>
 
-                      <td className="p-2">
-                        {formatBytes(item.totalDown)}
-                        <div className="text-xs text-slate-500">
-                          {item.totalDown.toLocaleString()} bytes
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
+                    <td className="p-2">
+                      {formatBytes(item.totalDown)}
+                      <div className="text-xs text-slate-500">
+                        {item.totalDown.toLocaleString()} bytes
+                      </div>
+                    </td>
+                  </tr>
+                ))
               ) : (
                 <tr className="border-t border-slate-300">
                   <td colSpan={10} className="p-6">

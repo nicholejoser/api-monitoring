@@ -41,7 +41,10 @@ export function DatePickerInput({
   const [open, setOpen] = React.useState(false);
   const [month, setMonth] = React.useState<Date | undefined>(date);
   const [value, setValue] = React.useState(formatDate(date));
-
+  React.useEffect(() => {
+    setMonth(date);
+    setValue(formatDate(date));
+  }, [date]);
   return (
     <Field className="mx-auto w-48">
       {/* <FieldLabel htmlFor="date-required">Subscription Date</FieldLabel> */}
