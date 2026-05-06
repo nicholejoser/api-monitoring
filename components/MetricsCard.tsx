@@ -34,14 +34,14 @@ export default function MetricsCard({
       <div
         className={`${cardBase} bg-linear-to-br from-amber-400 to-orange-500`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-end">
           <div className={iconBase}>
             <Server className="w-5 h-5 text-white" />
           </div>
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/80">
             Total Nodes
           </p>
           <p className="text-3xl font-bold mt-2">
@@ -55,14 +55,14 @@ export default function MetricsCard({
       <div
         className={`${cardBase} bg-linear-to-br from-emerald-500 to-teal-600`}
       >
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-end">
           <div className={iconBase}>
             <Database className="w-5 h-5 text-white" />
           </div>
         </div>
 
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-white/80">
+          <p className="text-xs font-bold uppercase tracking-wider text-white/80">
             Consumption Records
           </p>
           <p className="text-3xl font-bold mt-2">
@@ -102,7 +102,7 @@ export default function MetricsCard({
 
         <div className="flex flex-row gap-2">
           {/* Upload 95th */}
-          <div className="bg-indigo-50 p-5 rounded-xl">
+          <div className="w-full bg-indigo-50 p-5 rounded-xl">
             <p className="text-xs uppercase text-indigo-500 font-semibold">
               Upload (95th Percentile)
             </p>
@@ -112,7 +112,7 @@ export default function MetricsCard({
           </div>
 
           {/* Download 95th */}
-          <div className="bg-emerald-50 p-5 rounded-xl">
+          <div className="w-full bg-emerald-50 p-5 rounded-xl">
             <p className="text-xs uppercase text-emerald-500 font-semibold">
               Download (95th Percentile)
             </p>
