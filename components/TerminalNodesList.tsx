@@ -84,14 +84,14 @@ export default function TerminalNodesList({
           <Button
             variant="outline"
             role="combobox"
-            className="w-72 h-11 justify-between bg-white border-gray-300 shadow-sm"
+            className="w-52 h-11 justify-between bg-white border-gray-300 shadow-sm cursor-pointer"
           >
             {selected ? formatMonthYear(selected) : "Select data"}
             <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
           </Button>
         </PopoverTrigger>
 
-        <PopoverContent className="w-72 p-0">
+        <PopoverContent className="w-52 p-0">
           <Command>
             <CommandInput placeholder="Search data..." />
             <CommandEmpty>No data found.</CommandEmpty>

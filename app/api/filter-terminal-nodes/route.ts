@@ -1,16 +1,21 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 import { TerminalNode } from "../../../components/Types";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const dateFolder = searchParams.get("date");
+  if (!dateFolder) {
+    return NextResponse.json({ error: "Missing date" }, { status: 401 });
+  }
   try {
     const filePath = path.join(
       process.cwd(),
       "public",
       "data",
-      "2026-04-02",
-      "terminal_nodes_11-59-42.json",
+      dateFolder,
+      "terminal_nodes.json",
     );
 
     const raw = fs.readFileSync(filePath, "utf-8");
@@ -32,20 +37,13 @@ export async function GET() {
       process.cwd(),
       "public",
       "data",
-      "2026-04-02",
+      dateFolder,
       `filtered_terminal_nodes.json`,
     );
 
     fs.writeFileSync(outputPath, JSON.stringify(filtered, null, 2), "utf-8");
 
-    return NextResponse.json({
-      message: "Filtering complete",
-      total: data.length,
-      connectedOnly: connectedOnly.length,
-      filtered: filtered.length,
-      savedTo: "/data/filtered_terminal_nodes.json",
-      data: filtered,
-    });
+    return NextResponse.json(filtered);
   } catch (error) {
     console.error(error);
     return NextResponse.json(

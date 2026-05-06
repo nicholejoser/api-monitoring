@@ -5,6 +5,8 @@ import Header from "@/components/Header";
 import jwt from "jsonwebtoken";
 import { DataProvider } from "@/context/DataContext";
 import { redirect } from "next/navigation";
+import { toast } from "sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default async function DashboardLayout({
   children,
@@ -50,8 +52,8 @@ export default async function DashboardLayout({
     const fiberData = await fiberRes.json();
 
     if (!localRes.ok || !fiberRes.ok) {
-      console.error(localData.message);
-      return;
+      toast.error("Failed to sign in.");
+      redirect("/");
     }
 
     if (!Array.isArray(localData)) {
@@ -75,7 +77,9 @@ export default async function DashboardLayout({
         <Sidebar currentUser={currentUser} fiberKill={fiberKill} />
         <div className="flex flex-col flex-1">
           <Header />
-          <main className="p-6 overflow-y-auto">{children}</main>
+          <main className="p-6 overflow-y-auto">
+            <TooltipProvider>{children}</TooltipProvider>
+          </main>
         </div>
       </div>
     </DataProvider>
