@@ -98,7 +98,7 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
   `}
     >
       {/* ================= LOGO ================= */}
-      <div className="flex items-center gap-3 px-6 py-6 border-b border-gray-200">
+      <div className={`flex items-center gap-3 px-6 border-b border-gray-200 ${!collapsed ? "py-3.25": "py-3.5"}`}>
         <div className="w-10 h-10 bg-linear-to-br from-[#0ea5e9] to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
           <Coffee className="w-5 h-5 text-white" />
         </div>
@@ -117,7 +117,7 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="
-      absolute -right-3 top-24 w-7 h-7
+      absolute -right-3 top-14 w-7 h-7
       bg-white border border-gray-300
       rounded-full flex items-center justify-center
       text-gray-500 hover:text-gray-900 hover:bg-gray-100
@@ -309,7 +309,7 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
       {!collapsed && (
         <div className="px-4 py-4 border-t border-gray-200">
           <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow">
+            <div className="w-10 h-10 bg-linear-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow">
               {currentUser?.name?.charAt(0) ?? "U"}
             </div>
 

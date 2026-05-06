@@ -12,8 +12,8 @@ const lexend = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: "Rizal FiberVU",
-  description: "API Monitoring",
+  title: "DCS | FiberVU",
+  description: "Data Control System",
 };
 
 export default function RootLayout({

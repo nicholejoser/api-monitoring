@@ -18,12 +18,16 @@ export async function GET(req: NextRequest) {
   const token = searchParams.get("token");
   const startDate = searchParams.get("start");
   const endDate = searchParams.get("end");
+  const dateFolder = searchParams.get("date");
+  if (!dateFolder) {
+    return NextResponse.json({ error: "Missing date" }, { status: 401 });
+  }
   // 1. Load terminal nodes file
   const filePath = path.join(
     process.cwd(),
     "public",
     "data",
-    "2026-04-02",
+    dateFolder,
     "filtered_terminal_nodes.json",
   );
 
@@ -149,8 +153,8 @@ export async function GET(req: NextRequest) {
         process.cwd(),
         "public",
         "data",
-        "2026-04-02",
-        "consumption_data2.json",
+        dateFolder,
+        "consumption_data.json",
       );
 
       fs.mkdirSync(path.dirname(outputPath), { recursive: true });

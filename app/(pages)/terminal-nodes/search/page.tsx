@@ -677,8 +677,9 @@ export default function TerminalNodesSearch() {
                     <Download className="w-5 h-5 shrink-0" />
                   </button>
                 </div>
-
-                <Consumption data={consumptionData} />
+                <div className="w-full h-100">
+                  <Consumption data={consumptionData} />
+                </div>
               </div>
             ) : (
               <div className="flex flex-col items-start gap-5 p-5">

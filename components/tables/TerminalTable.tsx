@@ -199,15 +199,6 @@ export default function TerminalTable({
 
   return (
     <div className="w-full font-lexend text-sm">
-      <div className="w-full flex flex-row items-center justify-end gap-3 pb-3">
-        <button
-          onClick={handleExportTable}
-          className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-3 rounded-md text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
-        >
-          <Download className="w-5 h-5 shrink-0" />
-          Export to Excel
-        </button>
-      </div>
       <div className="flex justify-between mb-3">
         <div className="flex flex-row items-center gap-3">
           <input
@@ -382,6 +373,13 @@ export default function TerminalTable({
               </SelectGroup>
             </SelectContent>
           </Select>
+          <button
+            onClick={handleExportTable}
+            className="w-fit flex items-center gap-1 bg-linear-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white px-2.5 py-3 rounded-md text-sm font-semibold transition-all shadow-lg shadow-emerald-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
+          >
+            <Download className="w-5 h-5 shrink-0" />
+            Export to Excel
+          </button>
         </div>
       </div>
 
