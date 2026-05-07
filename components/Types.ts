@@ -147,3 +147,13 @@ export interface AnalyticsProps {
   upload95: number;
   download95: number;
 }
+
+export interface ConsumptionRequestBody {
+  id: number;
+  terminal_node_id: string;
+  created_at: string;
+  clientId: number;
+  consumptionDay: string; // ISO date string
+  up: string;
+  down: string;
+}

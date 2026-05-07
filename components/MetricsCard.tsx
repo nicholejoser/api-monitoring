@@ -32,7 +32,7 @@ export default function MetricsCard({
     <div className="flex flex-row items-center justify-between gap-6 font-lexend">
       {/* TOTAL NODES */}
       <div
-        className={`${cardBase} bg-linear-to-br from-amber-400 to-orange-500`}
+        className={`${cardBase} bg-linear-to-br from-amber-400 to-orange-500 hover:shadow-amber-200/50`}
       >
         <div className="flex items-center justify-end">
           <div className={iconBase}>
@@ -53,7 +53,7 @@ export default function MetricsCard({
 
       {/* CONSUMPTION RECORDS */}
       <div
-        className={`${cardBase} bg-linear-to-br from-emerald-500 to-teal-600`}
+        className={`${cardBase} bg-linear-to-br from-emerald-500 to-teal-600 hover:shadow-emerald-200/50`}
       >
         <div className="flex items-center justify-end">
           <div className={iconBase}>
@@ -94,7 +94,7 @@ export default function MetricsCard({
 
       {/* DOWNLOAD 95th */}
       <div
-        className={`${cardBase} bg-linear-to-br from-indigo-500 to-violet-600`}
+        className={`${cardBase} bg-linear-to-br from-indigo-500 to-violet-600 hover:shadow-indigo-200/50`}
       >
         <h3 className="text-sm font-semibold text-white uppercase tracking-wider mb-6">
           95th Percentile Analysis

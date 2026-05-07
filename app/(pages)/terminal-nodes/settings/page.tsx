@@ -17,6 +17,7 @@ import {
   Download,
   Info,
   RefreshCcw,
+  Upload,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -34,6 +35,7 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
+import UploadJson from "@/components/UploadJson";
 
 export default function TerminalNodeSettings() {
   const { fvKill } = useData();
@@ -60,7 +62,7 @@ export default function TerminalNodeSettings() {
     });
 
     const interval = setInterval(async () => {
-      const res = await fetch("/api/terminalnodes/progress");
+      const res = await fetch("/api/progress");
       const data = await res.json();
 
       setFetched(data.fetched);
@@ -79,7 +81,7 @@ export default function TerminalNodeSettings() {
         `/api/consumption?token=${fvKill}&type=multiple&date=${selected}&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
       );
       const interval = setInterval(async () => {
-        const res = await fetch("/api/terminalnodes/progress");
+        const res = await fetch("/api/progress");
         const data = await res.json();
 
         setFetched(data.fetched);
@@ -284,7 +286,7 @@ export default function TerminalNodeSettings() {
         </div>
       </div>
       {/* ================= CONSUMPTION CARD ================= */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="w-full flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
           <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
             Fetch Consumption Logs
@@ -322,6 +324,16 @@ export default function TerminalNodeSettings() {
               )}
             </button>
           </div>
+        </div>
+      </div>
+      <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="w-full flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50">
+          <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wider">
+            Import Data to Database
+          </h2>
+        </div>
+        <div className="p-6">
+          <UploadJson />
         </div>
       </div>
     </div>

@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "../ui/select";
 import { DialogScrollableContent } from "../DialogScrollableContent";
-import { formatBytes } from "../../lib/utils";
+import { formatBytes, percentile } from "../../lib/utils";
 import { ChevronDown, ChevronUp, DatabaseSearch, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";
@@ -28,7 +28,7 @@ interface TerminalTableProps {
   setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
   setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }
-export default function TerminalTable({
+export default function TerminalPercentileTable({
   terminalNodedata,
   consumptionData,
   selectedDate,
@@ -65,7 +65,7 @@ export default function TerminalTable({
   // 🔍 Filtered data
   const filteredData = useMemo(() => {
     return terminalNodedata.filter((item) => {
-      const matchSearch = `${item.clientName} ${item.cityName} ${item.status}`
+      const matchSearch = `${item.clientName} ${item.cityName} ${item.status} ${item.packageName} ${item.oltName} ${item.serialNumber} ${item.clientId}`
         .toLowerCase()
         .includes(search.toLowerCase());
 
@@ -80,48 +80,47 @@ export default function TerminalTable({
       return matchSearch && matchStatus && matchPackage;
     });
   }, [terminalNodedata, search, statusFilter, packageFilter]);
-  
+
   const enrichedData = useMemo(() => {
     return filteredData.map((item) => {
       const clientConsumption = consumptionMap[item.clientId] || [];
+
       const filteredConsumption = clientConsumption.filter((row) => {
-        const rowDate = normalizeDate(new Date(row.consumptionDay));
+        if (!startDate && !endDate) return true;
 
-        if (selectedDate) {
-          const selected = new Date(selectedDate);
-          if (
-            rowDate.getFullYear() !== selected.getFullYear() ||
-            rowDate.getMonth() !== selected.getMonth()
-          ) {
-            return false;
-          }
-        }
+        const rowDate = new Date(row.consumptionDay);
 
-        const start = startDate ? normalizeDate(startDate) : null;
-        const end = endDate ? normalizeDate(endDate) : null;
-
-        if (start && rowDate < start) return false;
-        if (end && rowDate > end) return false;
+        if (startDate && rowDate < startDate) return false;
+        if (endDate && rowDate > endDate) return false;
 
         return true;
       });
 
-      const totalUp = filteredConsumption.reduce(
-        (sum, row) => sum + Number(row.up),
-        0,
-      );
+      // per-day values (important change)
+      const upValues = filteredConsumption.map((row) => Number(row.up));
+      const downValues = filteredConsumption.map((row) => Number(row.down));
 
-      const totalDown = filteredConsumption.reduce(
-        (sum, row) => sum + Number(row.down),
-        0,
-      );
+      const totalUp = upValues.reduce((sum, v) => sum + v, 0);
+      const totalDown = downValues.reduce((sum, v) => sum + v, 0);
+
+      // NEW: per-client percentile (this is the key change)
+      const upload95 = percentile(upValues, 95);
+      const download95 = percentile(downValues, 95);
+    //   console.log("UPLOAD VALUES", upValues);
+    //   console.log(
+    //     "SORTED",
+    //     [...upValues].sort((a, b) => a - b),
+    //   );
+    //   console.log("UPLOAD 95TH", upload95);
       return {
         ...item,
         totalUp,
         totalDown,
+        upload95,
+        download95,
       };
     });
-  }, [filteredData, consumptionMap, selectedDate, startDate, endDate]);
+  }, [filteredData, consumptionMap, startDate, endDate]);
 
   const sortData = <T,>(
     array: T[],
@@ -440,6 +439,48 @@ export default function TerminalTable({
                     ) : null}
                   </div>
                 </th>
+                <th
+                  className="p-2 text-left"
+                  onClick={() =>
+                    setSortConfig((prev) =>
+                      prev?.key === "upload95" && prev.direction === "asc"
+                        ? { key: "upload95", direction: "desc" }
+                        : { key: "upload95", direction: "asc" },
+                    )
+                  }
+                >
+                  <div className="flex flex-row items-center gap-2 cursor-pointer">
+                    Upload (95th)
+                    {sortConfig?.key === "upload95" ? (
+                      sortConfig.direction === "asc" ? (
+                        <ChevronUp className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0" />
+                      )
+                    ) : null}
+                  </div>
+                </th>
+                <th
+                  className="p-2 text-left"
+                  onClick={() =>
+                    setSortConfig((prev) =>
+                      prev?.key === "download95" && prev.direction === "asc"
+                        ? { key: "download95", direction: "desc" }
+                        : { key: "download95", direction: "asc" },
+                    )
+                  }
+                >
+                  <div className="flex flex-row items-center gap-2 cursor-pointer">
+                    Download (95th)
+                    {sortConfig?.key === "download95" ? (
+                      sortConfig.direction === "asc" ? (
+                        <ChevronUp className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0" />
+                      )
+                    ) : null}
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -485,12 +526,25 @@ export default function TerminalTable({
                           {item.totalDown.toLocaleString()} bytes
                         </div>
                       </td>
+                      <td className="p-2">
+                        {formatBytes(item.upload95)}
+                        <div className="text-xs text-slate-500">
+                          {item.upload95.toLocaleString()} bytes
+                        </div>
+                      </td>
+
+                      <td className="p-2">
+                        {formatBytes(item.download95)}
+                        <div className="text-xs text-slate-500">
+                          {item.download95.toLocaleString()} bytes
+                        </div>
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr className="border-t border-slate-300">
-                  <td colSpan={10} className="p-6">
+                  <td colSpan={12} className="p-6">
                     <div className="flex flex-col items-center justify-center gap-3 text-center text-slate-500">
                       <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center">
                         <DatabaseSearch className="w-6 h-6 text-slate-400" />

@@ -42,13 +42,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const [res1, res2] = await Promise.all([
         // fetch("/data/terminal_nodes.json"),
         // fetch("/data/consumption_data.json"),
-        fetch("/data/2026-04-02/filtered_terminal_nodes.json"),
-        fetch("/data/2026-04-02/consumption_data.json"),
+        // fetch("/data/2026-04-02/filtered_terminal_nodes.json"),
+        // fetch("/data/2026-04-02/filtered_terminal_nodes.json"),
+        fetch("/api/import?type=terminal_nodes", { method: "GET" }),
+        fetch("/api/import?type=consumptions", { method: "GET" }),
       ]);
 
       const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
 
-      setTerminalNodeData(data1);
+      setTerminalNodeData(data1.data);
       setConsumptionGroupData(data2);
 
       toast.success("Data loaded successfully!");
