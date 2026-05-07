@@ -20,15 +20,27 @@ export function getStartOfLastMonth(date = new Date()) {
 export function getEndOfLastMonth(date = new Date()) {
   return new Date(date.getFullYear(), date.getMonth(), 0);
 }
-export const formatBytes = (bytes: number) => {
-  if (bytes === 0) return "0 B";
 
-  const k = 1024;
-  const sizes = ["B", "KB", "MB", "GB", "TB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
+export function formatBytes(value: number) {
+  if (value == null || isNaN(value)) return "0 B";
 
-  return (bytes / Math.pow(k, i)).toFixed(2) + " " + sizes[i];
-};
+  const abs = Math.abs(value);
+
+  if (abs >= 1_000_000_000_000) {
+    return `${(value / 1_000_000_000_000).toFixed(2)} TB`;
+  }
+  if (abs >= 1_000_000_000) {
+    return `${(value / 1_000_000_000).toFixed(2)} GB`;
+  }
+  if (abs >= 1_000_000) {
+    return `${(value / 1_000_000).toFixed(2)} MB`;
+  }
+  if (abs >= 1_000) {
+    return `${(value / 1_000).toFixed(2)} KB`;
+  }
+
+  return `${value.toFixed(0)} B`;
+}
 export const monthNames = [
   "January",
   "February",

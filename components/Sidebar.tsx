@@ -12,6 +12,7 @@ import {
   Server,
   Search,
   BarChart,
+  Logs,
 } from "lucide-react";
 import { toast } from "sonner";
 import { User } from "./Types";
@@ -45,6 +46,11 @@ export const menuItems = [
         name: "Find by Client",
         icon: Search,
         href: "/terminal-nodes/search", // Page with a search input for a specific client
+      },
+      {
+        name: "Logs",
+        icon: Logs,
+        href: "/terminal-nodes/logs", // Page with a search input for a specific client
       },
     ],
   },
@@ -106,8 +112,8 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
         {!collapsed && (
           <div>
             <h1 className=" font-semibold text-lg tracking-wide">DCS</h1>
-            <p className="text-gray-500 text-xs tracking-wide">
-              Admin Dashboard
+            <p className="text-gray-500 text-xs tracking-wide capitalize">
+              {currentUser?.role} Dashboard
             </p>
           </div>
         )}

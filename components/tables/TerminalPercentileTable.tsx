@@ -65,9 +65,10 @@ export default function TerminalPercentileTable({
   // 🔍 Filtered data
   const filteredData = useMemo(() => {
     return terminalNodedata.filter((item) => {
-      const matchSearch = `${item.clientName} ${item.cityName} ${item.status} ${item.packageName} ${item.oltName} ${item.serialNumber} ${item.clientId}`
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      const matchSearch =
+        `${item.clientName} ${item.cityName} ${item.status} ${item.packageName} ${item.oltName} ${item.serialNumber} ${item.clientId}`
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
       const matchStatus =
         statusFilter === "all" || item.status === statusFilter;
@@ -88,10 +89,12 @@ export default function TerminalPercentileTable({
       const filteredConsumption = clientConsumption.filter((row) => {
         if (!startDate && !endDate) return true;
 
-        const rowDate = new Date(row.consumptionDay);
+        const rowDate = normalizeDate(new Date(row.consumptionDay));
+        const start = startDate ? normalizeDate(startDate) : null;
+        const end = endDate ? normalizeDate(endDate) : null;
 
-        if (startDate && rowDate < startDate) return false;
-        if (endDate && rowDate > endDate) return false;
+        if (start && rowDate < start) return false;
+        if (end && rowDate > end) return false;
 
         return true;
       });
@@ -106,12 +109,12 @@ export default function TerminalPercentileTable({
       // NEW: per-client percentile (this is the key change)
       const upload95 = percentile(upValues, 95);
       const download95 = percentile(downValues, 95);
-    //   console.log("UPLOAD VALUES", upValues);
-    //   console.log(
-    //     "SORTED",
-    //     [...upValues].sort((a, b) => a - b),
-    //   );
-    //   console.log("UPLOAD 95TH", upload95);
+      //   console.log("UPLOAD VALUES", upValues);
+      //   console.log(
+      //     "SORTED",
+      //     [...upValues].sort((a, b) => a - b),
+      //   );
+      //   console.log("UPLOAD 95TH", upload95);
       return {
         ...item,
         totalUp,
@@ -390,8 +393,48 @@ export default function TerminalPercentileTable({
             <thead className="bg-slate-200 sticky top-0">
               <tr>
                 <th className="p-2 text-left">No</th>
-                <th className="p-2 text-left">ID</th>
-                <th className="p-2 text-left">Client</th>
+                 <th
+                  className="p-2 text-left"
+                  onClick={() =>
+                    setSortConfig((prev) =>
+                      prev?.key === "clientId" && prev.direction === "asc"
+                        ? { key: "clientId", direction: "desc" }
+                        : { key: "clientId", direction: "asc" },
+                    )
+                  }
+                >
+                  <div className="flex flex-row items-center gap-2 cursor-pointer">
+                    ID
+                    {sortConfig?.key === "clientId" ? (
+                      sortConfig.direction === "asc" ? (
+                        <ChevronUp className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0" />
+                      )
+                    ) : null}
+                  </div>
+                </th>
+                <th
+                  className="p-2 text-left"
+                  onClick={() =>
+                    setSortConfig((prev) =>
+                      prev?.key === "clientName" && prev.direction === "asc"
+                        ? { key: "clientName", direction: "desc" }
+                        : { key: "clientName", direction: "asc" },
+                    )
+                  }
+                >
+                  <div className="flex flex-row items-center gap-2 cursor-pointer">
+                    Client
+                    {sortConfig?.key === "clientName" ? (
+                      sortConfig.direction === "asc" ? (
+                        <ChevronUp className="w-4 h-4 shrink-0" />
+                      ) : (
+                        <ChevronDown className="w-4 h-4 shrink-0" />
+                      )
+                    ) : null}
+                  </div>
+                </th>
                 <th className="p-2 text-left">City</th>
                 <th className="p-2 text-left">Status</th>
                 <th className="p-2 text-left">Package</th>

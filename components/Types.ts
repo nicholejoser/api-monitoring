@@ -157,3 +157,11 @@ export interface ConsumptionRequestBody {
   up: string;
   down: string;
 }
+export interface Log {
+  userId: string;
+  name: string;
+  username: string;
+  email: string;
+  role: string;
+  timestamp: string;
+}
