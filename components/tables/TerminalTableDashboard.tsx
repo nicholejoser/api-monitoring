@@ -8,6 +8,7 @@ import { AnalyticsProps } from "../Types";
 import { formatBytes } from "@/lib/utils";
 import TerminalNodesList from "../TerminalNodesList";
 import { toast } from "sonner";
+import TerminalPercentileTable from "./TerminalPercentileTable";
 
 export default function TerminalTableDashboard({
   analytics,
@@ -183,7 +184,7 @@ export default function TerminalTableDashboard({
             </div>
           </TabsContent>
           <TabsContent value="all">
-            <TerminalTable
+            <TerminalPercentileTable
               terminalNodedata={terminalNodeData}
               consumptionData={consumptionGroupData}
               selectedDate={selectedDate}
