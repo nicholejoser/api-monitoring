@@ -46,8 +46,28 @@ export async function POST(req: NextRequest) {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
-      maxAge: 60 * 60 * 24
+      maxAge: 60 * 60 * 24,
     });
+    const logEntry = {
+      userId: user.id,
+      name: user.name,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      timestamp: new Date().toLocaleString("en-PH", {
+        timeZone: "Asia/Manila",
+      }),
+    };
+    const dir = path.join(process.cwd(), "public/data/logs/logins");
+
+    // ensure folder exists
+    fs.mkdirSync(dir, { recursive: true });
+
+    // one file per login (simple approach)
+    const fileName = `${Date.now()}.json`;
+    const logsPath = path.join(dir, fileName);
+
+    fs.writeFileSync(logsPath, JSON.stringify(logEntry, null, 2));
 
     return NextResponse.json({ message: "Login successful" });
   } else if (reqType === "fibervu-login") {
