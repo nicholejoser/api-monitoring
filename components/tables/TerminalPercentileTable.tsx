@@ -31,7 +31,6 @@ interface TerminalTableProps {
 export default function TerminalPercentileTable({
   terminalNodedata,
   consumptionData,
-  selectedDate,
   startDate,
   endDate,
   setStartDate,

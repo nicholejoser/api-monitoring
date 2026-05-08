@@ -17,7 +17,6 @@ import {
   Download,
   Info,
   RefreshCcw,
-  Upload,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
