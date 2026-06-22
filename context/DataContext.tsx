@@ -42,8 +42,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       const [res1, res2] = await Promise.all([
         // fetch("/data/terminal_nodes.json"),
         // fetch("/data/consumption_data.json"),
-        fetch("/data/2026-04-02/filtered_terminal_nodes.json"),
-        fetch("/data/2026-04-02/consumption_data.json"),
+        fetch("/data/2026-05-01/filtered_terminal_nodes.json"),
+        fetch("/data/2026-05-01/consumption_data.json"),
         // fetch("/api/import?type=terminal_nodes", { method: "GET" }),
         // fetch("/api/import?type=consumptions", { method: "GET" }),
       ]);

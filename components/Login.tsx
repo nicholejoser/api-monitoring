@@ -38,7 +38,6 @@ export default function Login() {
       toast.error("Something went wrong. Try again.");
     } finally {
       toast.dismiss(toastID);
-      setLoading(false);
     }
   };
 
