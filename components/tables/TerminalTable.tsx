@@ -27,6 +27,7 @@ interface TerminalTableProps {
   endDate: Date | undefined;
   setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
   setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  tabType?:string;
 }
 export default function TerminalTable({
   terminalNodedata,
@@ -36,6 +37,7 @@ export default function TerminalTable({
   endDate,
   setStartDate,
   setEndDate,
+  tabType
 }: TerminalTableProps) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -195,7 +197,10 @@ export default function TerminalTable({
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Terminal Data");
 
-    XLSX.writeFile(workbook, `Terminal-Table.xlsx`);
+    XLSX.writeFile(
+         workbook,
+         `${tabType} - ${startDate?.toLocaleDateString("en-CA")} - ${endDate?.toLocaleDateString("en-CA")}.xlsx`,
+       );
   };
 
   return (

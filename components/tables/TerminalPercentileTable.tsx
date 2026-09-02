@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ConsumptionGroupedByClient,
   DailyConsumption,
@@ -27,6 +27,7 @@ interface TerminalTableProps {
   endDate: Date | undefined;
   setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
   setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  tabType: string;
 }
 export default function TerminalPercentileTable({
   terminalNodedata,
@@ -35,6 +36,7 @@ export default function TerminalPercentileTable({
   endDate,
   setStartDate,
   setEndDate,
+  tabType
 }: TerminalTableProps) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -196,7 +198,10 @@ export default function TerminalPercentileTable({
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Terminal Data");
 
-    XLSX.writeFile(workbook, `Terminal-Table.xlsx`);
+    XLSX.writeFile(
+      workbook,
+      `${tabType} - ${startDate?.toLocaleDateString("en-CA")} - ${endDate?.toLocaleDateString("en-CA")}.xlsx`,
+    );
   };
 
   return (
@@ -392,7 +397,7 @@ export default function TerminalPercentileTable({
             <thead className="bg-slate-200 sticky top-0">
               <tr>
                 <th className="p-2 text-left">No</th>
-                 <th
+                <th
                   className="p-2 text-left"
                   onClick={() =>
                     setSortConfig((prev) =>
