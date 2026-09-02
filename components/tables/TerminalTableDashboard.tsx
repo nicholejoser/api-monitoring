@@ -101,24 +101,24 @@ export default function TerminalTableDashboard({
                 All
               </TabsTrigger>
               <TabsTrigger
-                value="upload"
-                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "upload" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
+                value="Top 20k Upload"
+                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "Top 20k Upload" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
               >
                 <Upload className="w-4 h-4" />
                 Top 20k Upload
               </TabsTrigger>
 
               <TabsTrigger
-                value="download"
-                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "download" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
+                value="Top 20k Download"
+                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "Top 20k Download" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
               >
                 <Download className="w-4 h-4" />
                 Top 20k Download
               </TabsTrigger>
 
               <TabsTrigger
-                value="percentile"
-                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "percentile" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
+                value="95th Percentile"
+                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "95th Percentile" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
               >
                 <BarChart3 className="w-4 h-4" />
                 95th Percentile
@@ -126,7 +126,7 @@ export default function TerminalTableDashboard({
             </TabsList>
           </div>
 
-          <TabsContent value="upload">
+          <TabsContent value="Top 20k Upload">
             <TerminalTable
               terminalNodedata={analytics.topUpload}
               consumptionData={consumptionGroupData}
@@ -135,9 +135,10 @@ export default function TerminalTableDashboard({
               endDate={endDate}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
+              tabType={tabType}
             />
           </TabsContent>
-          <TabsContent value="download">
+          <TabsContent value="Top 20k Download">
             <TerminalTable
               terminalNodedata={analytics.topDownload}
               consumptionData={consumptionGroupData}
@@ -146,9 +147,10 @@ export default function TerminalTableDashboard({
               endDate={endDate}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
+              tabType={tabType}
             />
           </TabsContent>
-          <TabsContent value="percentile">
+          <TabsContent value="95th Percentile">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
               <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-6">
                 95th Percentile Analysis
@@ -192,6 +194,7 @@ export default function TerminalTableDashboard({
               endDate={endDate}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
+              tabType={tabType}
             />
           </TabsContent>
         </Tabs>

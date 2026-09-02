@@ -63,6 +63,7 @@ export default async function DashboardLayout({
     const foundUser = localData.find(
       (u: User) => String(u.id) === String(decoded.id),
     );
+    console.log(fiberData)
     if (foundUser) {
       currentUser = foundUser;
       fiberKill = fiberData.token.id;
