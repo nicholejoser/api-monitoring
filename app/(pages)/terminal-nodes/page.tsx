@@ -8,7 +8,7 @@ import { useData } from "@/context/DataContext";
 import { getEndOfMonth, getStartOfMonth } from "@/lib/utils";
 import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function TerminalNodesAll() {
@@ -28,28 +28,23 @@ export default function TerminalNodesAll() {
   const router = useRouter();
   const [files, setFiles] = useState<string[]>([]);
   const [selected, setSelected] = useState<string>("");
+  const hasFetchedRef = useRef<boolean>(false);
 
   useEffect(() => {
-    let isMounted = true;
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
 
     const loadFiles = async () => {
       try {
         const res = await fetch("/api/data-files");
         const data = await res.json();
 
-        if (isMounted) {
-          setFiles(data);
-        }
+        setFiles(data);
       } catch {
         toast.error("Failed loading data options");
       }
     };
-
     loadFiles();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   return (
@@ -107,8 +102,6 @@ export default function TerminalNodesAll() {
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 }

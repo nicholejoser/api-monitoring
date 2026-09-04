@@ -32,36 +32,51 @@ export const menuItems = [
   },
   {
     name: "Terminal Nodes",
-    icon: Server, // Main icon for the category
-    href: "/terminal-nodes", // Parent link can go to the overview
+    icon: Server,
     roles: ["superadmin"],
+    // No href here since it's a parent category container for sub-menus
     subMenu: [
       {
         name: "Node Overview",
-        icon: BarChart, // Or a more specific icon
-        href: "/terminal-nodes", // Page to view all node data
+        icon: BarChart,
+        href: "/terminal-nodes",
       },
       {
         name: "Find by Client",
         icon: Search,
-        href: "/terminal-nodes/search", // Page with a search input for a specific client
+        href: "/terminal-nodes/search",
       },
       {
         name: "Logs",
         icon: Logs,
-        href: "/terminal-nodes/logs", // Page with a search input for a specific client
+        href: "/terminal-nodes/logs",
       },
     ],
   },
 ];
+
 interface SidebarProps {
   fiberKill: string;
 }
+<<<<<<< HEAD
 export default function Sidebar({ fiberKill }: SidebarProps) {
   const { setFVKill, currentUser } = useData();
+=======
+
+export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
+  const { setFVKill } = useData();
+>>>>>>> 03372eb (update: optimize data fetching with useRef to prevent redundant calls)
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+
+  // Find active parent menu name based on current sub-menu path
+  const activeParent = menuItems.find((item) =>
+    item.subMenu?.some((sub) => pathname.startsWith(sub.href))
+  )?.name;
+
+  const [openItem, setOpenItem] = useState<string | undefined>(activeParent);
+
   const handleLogout = async () => {
     const toastId = toast.loading("Logging out...");
 
@@ -81,26 +96,29 @@ export default function Sidebar({ fiberKill }: SidebarProps) {
       });
     }
   };
+
   useEffect(() => {
     if (fiberKill) {
       setFVKill(fiberKill);
     }
   }, [fiberKill, setFVKill]);
+
   const filteredMenu = menuItems.filter(
     (item) =>
       !item.roles || item.roles.includes(currentUser?.roles?.role ?? ""),
   );
+
   return (
     <aside
       className={`
-    ${collapsed ? "w-20" : "w-72"}
-    bg-white
-    min-h-screen flex flex-col
-    transition-all duration-300 ease-in-out
-    relative font-lexend
-    border-r border-gray-200
-    overflow-visible text-sm text-slate-700
-  `}
+        ${collapsed ? "w-20" : "w-72"}
+        bg-white
+        min-h-screen flex flex-col
+        transition-all duration-300 ease-in-out
+        relative font-lexend
+        border-r border-gray-200
+        overflow-visible text-sm text-slate-700
+      `}
     >
       {/* ================= LOGO ================= */}
       <div
@@ -112,7 +130,7 @@ export default function Sidebar({ fiberKill }: SidebarProps) {
 
         {!collapsed && (
           <div>
-            <h1 className=" font-semibold text-lg tracking-wide">DCS</h1>
+            <h1 className="font-semibold text-lg tracking-wide">DCS</h1>
             <p className="text-gray-500 text-xs tracking-wide capitalize">
               {currentUser?.roles?.role} Dashboard
             </p>
@@ -124,13 +142,13 @@ export default function Sidebar({ fiberKill }: SidebarProps) {
       <button
         onClick={() => setCollapsed(!collapsed)}
         className="
-      absolute -right-3 top-14 w-7 h-7
-      bg-white border border-gray-300
-      rounded-full flex items-center justify-center
-      text-gray-500 hover:text-gray-900 hover:bg-gray-100
-      transition-all shadow-sm cursor-pointer
-      z-10
-    "
+          absolute -right-3 top-14 w-7 h-7
+          bg-white border border-gray-300
+          rounded-full flex items-center justify-center
+          text-gray-500 hover:text-gray-900 hover:bg-gray-100
+          transition-all shadow-sm cursor-pointer
+          z-10
+        "
       >
         {collapsed ? (
           <ChevronRight className="w-3 h-3" />
@@ -152,47 +170,44 @@ export default function Sidebar({ fiberKill }: SidebarProps) {
         <Accordion
           type="single"
           collapsible
-          defaultValue={
-            menuItems.find((item) =>
-              item.subMenu?.some((sub) => pathname.startsWith(sub.href)),
-            )?.name
-          }
+          value={openItem}
+          onValueChange={setOpenItem}
           className="space-y-1"
         >
           {filteredMenu.map((item) => {
-            const hasSubMenu = item.subMenu?.length;
+            const hasSubMenu = item.subMenu && item.subMenu.length > 0;
             const isActive =
-              pathname === item.href ||
+              (item.href && pathname === item.href) ||
               item.subMenu?.some((sub) => pathname.startsWith(sub.href));
 
             /* ================= NO SUBMENU ================= */
-            if (!hasSubMenu) {
+            if (!hasSubMenu && item.href) {
               return (
                 <Link
                   key={item.name}
                   href={item.href}
                   className={`
-                group flex items-center gap-3
-                ${collapsed ? "justify-center px-0" : "px-2"}
-                py-3 rounded-xl relative
-                transition-all duration-200
-                ${
-                  isActive
-                    ? "bg-indigo-50 text-indigo-600 font-medium"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }
-              `}
+                    group flex items-center gap-3
+                    ${collapsed ? "justify-center px-0" : "px-2"}
+                    py-3 rounded-xl relative
+                    transition-all duration-200
+                    ${
+                      isActive
+                        ? "bg-indigo-50 text-indigo-600 font-medium"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }
+                  `}
                 >
                   <div
                     className={`
-                  flex items-center justify-center rounded-lg shrink-0
-                  ${collapsed ? "w-10 h-10" : "w-9 h-9"}
-                  ${
-                    isActive
-                      ? "bg-indigo-100"
-                      : "bg-gray-100 group-hover:bg-gray-200"
-                  }
-                `}
+                      flex items-center justify-center rounded-lg shrink-0
+                      ${collapsed ? "w-10 h-10" : "w-9 h-9"}
+                      ${
+                        isActive
+                          ? "bg-indigo-100"
+                          : "bg-gray-100 group-hover:bg-gray-200"
+                      }
+                    `}
                   >
                     <item.icon
                       className={`${collapsed ? "w-5 h-5" : "w-4 h-4"}`}
@@ -222,27 +237,27 @@ export default function Sidebar({ fiberKill }: SidebarProps) {
               >
                 <AccordionTrigger
                   className={`
-                group flex items-center gap-3
-                ${collapsed ? "justify-center px-0" : "px-2"}
-                py-3 rounded-xl hover:no-underline
-                transition-all duration-200
-                ${
-                  isActive
-                    ? "bg-indigo-50 text-indigo-600 font-medium"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }
-              `}
+                    group flex items-center gap-3
+                    ${collapsed ? "justify-center px-0" : "px-2"}
+                    py-3 rounded-xl hover:no-underline
+                    transition-all duration-200
+                    ${
+                      isActive
+                        ? "bg-indigo-50 text-indigo-600 font-medium"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    }
+                  `}
                 >
                   <div
                     className={`
-                  flex items-center justify-center rounded-lg shrink-0
-                  ${collapsed ? "w-10 h-10" : "w-9 h-9"}
-                  ${
-                    isActive
-                      ? "bg-indigo-100"
-                      : "bg-gray-100 group-hover:bg-gray-200"
-                  }
-                `}
+                      flex items-center justify-center rounded-lg shrink-0
+                      ${collapsed ? "w-10 h-10" : "w-9 h-9"}
+                      ${
+                        isActive
+                          ? "bg-indigo-100"
+                          : "bg-gray-100 group-hover:bg-gray-200"
+                      }
+                    `}
                   >
                     <item.icon
                       className={`${collapsed ? "w-5 h-5" : "w-4 h-4"}`}
@@ -272,14 +287,14 @@ export default function Sidebar({ fiberKill }: SidebarProps) {
                           key={sub.name}
                           href={sub.href}
                           className={`
-                        flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
-                        transition-all duration-200
-                        ${
-                          isSubActive
-                            ? "bg-indigo-50 text-indigo-600 border-l-2 border-indigo-500"
-                            : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 border-l-2 border-transparent"
-                        }
-                      `}
+                            flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm
+                            transition-all duration-200
+                            ${
+                              isSubActive
+                                ? "bg-indigo-50 text-indigo-600 border-l-2 border-indigo-500"
+                                : "text-gray-500 hover:bg-gray-100 hover:text-gray-900 border-l-2 border-transparent"
+                            }
+                          `}
                         >
                           <sub.icon className="w-4 h-4 shrink-0 opacity-70" />
                           <span className="font-lexend text-sm">
@@ -301,11 +316,11 @@ export default function Sidebar({ fiberKill }: SidebarProps) {
         <button
           onClick={handleLogout}
           className={`
-        group flex items-center gap-3 px-4 py-3 rounded-xl
-        text-gray-600 hover:bg-red-50 hover:text-red-600
-        transition-all duration-200 w-full cursor-pointer
-        ${collapsed ? "justify-center px-2" : ""}
-      `}
+            group flex items-center gap-3 px-4 py-3 rounded-xl
+            text-gray-600 hover:bg-red-50 hover:text-red-600
+            transition-all duration-200 w-full cursor-pointer
+            ${collapsed ? "justify-center px-2" : ""}
+          `}
         >
           <LogOut className="w-5 h-5 shrink-0" />
           {!collapsed && <span>Logout</span>}

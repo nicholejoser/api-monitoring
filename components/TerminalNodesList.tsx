@@ -9,7 +9,12 @@ import {
   CommandInput,
   CommandItem,
 } from "./ui/command";
-import { cn, formatMonthYear, getEndOfMonth, getStartOfMonth } from "@/lib/utils";
+import {
+  cn,
+  formatMonthYear,
+  getEndOfMonth,
+  getStartOfMonth,
+} from "@/lib/utils";
 import { ConsumptionGroupedByClient, TerminalNode } from "./Types";
 import { toast } from "sonner";
 
@@ -36,10 +41,11 @@ export default function TerminalNodesList({
   setEndDate,
 }: TerminalNodesListProps) {
   const [open, setOpen] = useState<boolean>(false);
-
+  const hasFetchedRef = React.useRef<boolean>(false);
   useEffect(() => {
     if (!selected) return;
-
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
     const fetchSelectedData = async () => {
       try {
         setIsLoading(true);
