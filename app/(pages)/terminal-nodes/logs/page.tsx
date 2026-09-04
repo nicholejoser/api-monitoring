@@ -5,7 +5,7 @@ import EntriesPerPage from "@/components/EntriesPerPage";
 import Loading from "@/components/Loading";
 import { Log } from "@/components/Types";
 import { DatabaseSearch } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function LogsPage() {
@@ -14,7 +14,7 @@ export default function LogsPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
-  
+  const hasMountedRef = useRef<boolean>(false);
   const fetchLogs = async () => {
     try {
       const res = await fetch("/api/logs");
@@ -29,7 +29,10 @@ export default function LogsPage() {
   };
 
   useEffect(() => {
-    fetchLogs();
+    if (!hasMountedRef.current) {
+      fetchLogs();
+      hasMountedRef.current = true;
+    }
   }, []);
   const filteredData = useMemo(() => {
     return logs.filter((item) => {

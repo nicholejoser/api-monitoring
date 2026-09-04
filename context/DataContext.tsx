@@ -65,8 +65,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (hasFetchedRef.current) return;
 
-    fetchData();
     hasFetchedRef.current = true;
+    fetchData();
   }, []);
 
   return (
