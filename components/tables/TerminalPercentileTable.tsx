@@ -107,15 +107,8 @@ export default function TerminalPercentileTable({
       const totalUp = upValues.reduce((sum, v) => sum + v, 0);
       const totalDown = downValues.reduce((sum, v) => sum + v, 0);
 
-      // NEW: per-client percentile (this is the key change)
       const upload95 = percentile(upValues, 95);
       const download95 = percentile(downValues, 95);
-      //   console.log("UPLOAD VALUES", upValues);
-      //   console.log(
-      //     "SORTED",
-      //     [...upValues].sort((a, b) => a - b),
-      //   );
-      //   console.log("UPLOAD 95TH", upload95);
       return {
         ...item,
         totalUp,

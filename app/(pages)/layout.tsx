@@ -40,7 +40,8 @@ export default async function DashboardLayout({
         <Sidebar fiberKill={fiberKill} />
         <div className="flex flex-col flex-1">
           <Header />
-          <main className="p-6 overflow-y-auto">
+
+          <main className="min-h-0 flex-1 overflow-y-auto p-6">
             <TooltipProvider>{children}</TooltipProvider>
           </main>
         </div>

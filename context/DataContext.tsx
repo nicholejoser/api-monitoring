@@ -79,8 +79,8 @@ export function DataProvider({
   useEffect(() => {
     if (hasFetchedRef.current) return;
 
-    hasFetchedRef.current = true;
     fetchData();
+    hasFetchedRef.current = true;
   }, []);
 
   return (

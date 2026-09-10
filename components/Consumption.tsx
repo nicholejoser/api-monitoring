@@ -87,97 +87,135 @@ export default function Consumption({ data }: { data: DailyConsumption[] }) {
   const [gridType, setGridType] = useState<string>("2");
 
   return (
-    <div className="w-full h-full">
-      <div className="flex flex-row items-center justify-end">
-        <Select defaultValue="2" value={gridType} onValueChange={setGridType}>
-          <SelectTrigger className="w-26 h-11! bg-white border-slate-200 text-slate-500 text-xs cursor-pointer">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent position="popper" className="bg-white">
-            <SelectGroup>
-              <SelectItem
-                value="0"
-                className="text-xs text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
-              >
-                All
-              </SelectItem>
-              <SelectItem
-                value="1"
-                className="text-xs text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
-              >
-                Vertical
-              </SelectItem>
-              <SelectItem
-                value="2"
-                className="text-xs text-slate-500 hover:bg-slate-100 cursor-pointer trasition-all duration-300 ease-in-out p-2"
-              >
-                Horizontal
-              </SelectItem>
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
+   <div className="flex h-full w-full min-w-0 flex-col">
+  {/* Controls */}
+  <div className="flex shrink-0 flex-row items-center justify-end">
+    <Select
+      defaultValue="2"
+      value={gridType}
+      onValueChange={setGridType}
+    >
+      <SelectTrigger className="h-11! w-26 cursor-pointer border-slate-200 bg-white text-xs text-slate-500">
+        <SelectValue />
+      </SelectTrigger>
 
-      <ResponsiveContainer>
-        <BarChart data={chartData}>
-          {gridType === "0" ? (
-            <CartesianGrid />
-          ) : gridType === "1" ? (
-            <CartesianGrid horizontal={false} />
-          ) : (
-            <CartesianGrid vertical={false} />
-          )}
+      <SelectContent
+        position="popper"
+        className="bg-white"
+      >
+        <SelectGroup>
+          <SelectItem
+            value="0"
+            className="cursor-pointer p-2 text-xs text-slate-500 transition-all duration-300 ease-in-out hover:bg-slate-100"
+          >
+            All
+          </SelectItem>
 
-          <XAxis dataKey="label" interval="preserveStartEnd" minTickGap={20} />
+          <SelectItem
+            value="1"
+            className="cursor-pointer p-2 text-xs text-slate-500 transition-all duration-300 ease-in-out hover:bg-slate-100"
+          >
+            Vertical
+          </SelectItem>
 
-          <YAxis tickFormatter={(value) => formatBytesAuto(value)} />
+          <SelectItem
+            value="2"
+            className="cursor-pointer p-2 text-xs text-slate-500 transition-all duration-300 ease-in-out hover:bg-slate-100"
+          >
+            Horizontal
+          </SelectItem>
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  </div>
 
-          <Tooltip
-            formatter={(value, name) => {
-              const num = typeof value === "number" ? value : Number(value);
-              return [formatBytesAuto(num), name as string];
-            }}
-            labelFormatter={(label, payload) => {
-              const item = payload?.[0]?.payload;
-              return new Date(item?.date).toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              });
-            }}
-            contentStyle={{
-              borderRadius: "12px",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#ffffff",
-              padding: "10px 14px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            }}
-            labelStyle={{
-              color: "#6b7280",
-              fontSize: "12px",
-              marginBottom: "4px",
-            }}
-            itemStyle={{
-              fontWeight: 500,
-            }}
-          />
+  {/* Chart */}
+  <div className="min-h-0 min-w-0 flex-1">
+    <ResponsiveContainer
+      width="100%"
+      height="100%"
+    >
+      <BarChart data={chartData}>
+        {gridType === "0" ? (
+          <CartesianGrid />
+        ) : gridType === "1" ? (
+          <CartesianGrid horizontal={false} />
+        ) : (
+          <CartesianGrid vertical={false} />
+        )}
 
-          <Legend />
-          {/* Clean & Professional */}
-          {/* <Bar dataKey="up" stackId="a" fill="#7c3aed" name="Up" />
-          <Bar dataKey="down" stackId="a" fill="#f59e0b" name="Down" /> */}
-          {/* Clean Tech Look */}
-          <Bar dataKey="up" stackId="a" fill="#22c55e" name="Upload" />
-          <Bar dataKey="down" stackId="a" fill="#0ea5e9" name="Download" />
-          {/* <Bar dataKey="up" stackId="a" fill="#0ea5e9" name="Up" />
-          {/* High Contrast */}
-          {/* <Bar dataKey="up" stackId="a" fill="#10b981" name="Up" />
-          <Bar dataKey="down" stackId="a" fill="#ef4444" name="Down" /> */}
-          {/* Dark Theme Friendly */}
-          {/* <Bar dataKey="up" stackId="a" fill="#a78bfa" name="Up" />
-          <Bar dataKey="down" stackId="a" fill="#f97316" name="Down" /> */}
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+        <XAxis
+          dataKey="label"
+          interval="preserveStartEnd"
+          minTickGap={20}
+        />
+
+        <YAxis
+          tickFormatter={(value) =>
+            formatBytesAuto(value)
+          }
+        />
+
+        <Tooltip
+          formatter={(value, name) => {
+            const num =
+              typeof value === "number"
+                ? value
+                : Number(value);
+
+            return [
+              formatBytesAuto(num),
+              name as string,
+            ];
+          }}
+          labelFormatter={(label, payload) => {
+            const item = payload?.[0]?.payload;
+
+            return new Date(
+              item?.date
+            ).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+          }}
+          contentStyle={{
+            borderRadius: "12px",
+            border: "1px solid #e5e7eb",
+            backgroundColor: "#ffffff",
+            padding: "10px 14px",
+            boxShadow:
+              "0 4px 12px rgba(0,0,0,0.08)",
+          }}
+          labelStyle={{
+            color: "#6b7280",
+            fontSize: "12px",
+            marginBottom: "4px",
+          }}
+          itemStyle={{
+            fontWeight: 500,
+          }}
+        />
+
+        <Legend />
+
+        <Bar
+          dataKey="up"
+          stackId="a"
+          fill="#22c55e"
+          name="Upload"
+        />
+
+        <Bar
+          dataKey="down"
+          stackId="a"
+          fill="#0ea5e9"
+          name="Download"
+        />
+      </BarChart>
+    </ResponsiveContainer>
+  </div>
+</div>
+
   );
 }
