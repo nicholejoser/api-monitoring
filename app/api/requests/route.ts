@@ -84,7 +84,6 @@ export async function POST(req: NextRequest) {
       });
 
       const data = await res.json();
-      console.log("FIBERVU DATA:", data);
       if (!res.ok) {
         return NextResponse.json(
           { error: "Login failed", details: data },

@@ -91,7 +91,7 @@ export default function TerminalNodeSettings() {
             description: `Total clients: ${data.totalClients}. Total fetched: ${data.totalFetched}`,
           });
         }
-      }, 500);
+      }, 2000);
     } catch (err) {
       console.error("Request failed:", err);
     }

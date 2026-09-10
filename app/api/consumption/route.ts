@@ -100,12 +100,7 @@ export async function GET(req: NextRequest) {
 
       // 3. Loop each client
       for (const client of connectedClients) {
-        const clientID = client.clientId;
         const terminalNodeId = client.id;
-
-        console.log(
-          `[FETCH START] Client ID: ${clientID}, Terminal Node ID: ${terminalNodeId}`,
-        );
         const baseUrl = `https://110.93.79.226/api/fttx/terminal-nodes/${terminalNodeId}/consumption-logs`;
 
         const filter = {
@@ -138,10 +133,6 @@ export async function GET(req: NextRequest) {
             data,
           });
           incrementProgress(1);
-
-          console.log(
-            `[FETCH SUCCESS] Client ID: ${clientID} → records: ${data?.length ?? 0}`,
-          );
         }
 
         await new Promise((r) => setTimeout(r, 50));

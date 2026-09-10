@@ -63,7 +63,6 @@ export default async function DashboardLayout({
     const foundUser = localData.find(
       (u: User) => String(u.id) === String(decoded.id),
     );
-    console.log(fiberData)
     if (foundUser) {
       currentUser = foundUser;
       fiberKill = fiberData.token.id;
@@ -76,9 +75,11 @@ export default async function DashboardLayout({
     <DataProvider>
       <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">
         <Sidebar currentUser={currentUser} fiberKill={fiberKill} />
-        <div className="flex flex-col flex-1">
+
+        <div className="flex min-w-0 flex-1 flex-col">
           <Header />
-          <main className="p-6 overflow-y-auto">
+
+          <main className="min-h-0 flex-1 overflow-y-auto p-6">
             <TooltipProvider>{children}</TooltipProvider>
           </main>
         </div>

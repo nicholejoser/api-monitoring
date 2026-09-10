@@ -1,99 +1,187 @@
 "use client";
 
-import { ConsumptionGroupedByClient, TerminalNode } from "@/components/Types";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef } from "react";
 import { toast } from "sonner";
+import { create } from "zustand";
 
-interface DataContextType {
+import {
+  ConsumptionGroupedByClient,
+  TerminalNode,
+} from "@/components/Types";
+
+interface DataStore {
   terminalNodeData: TerminalNode[];
   consumptionGroupData: ConsumptionGroupedByClient[];
   isLoading: boolean;
-  refreshData: () => Promise<void>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   fvKill: string;
-  setFVKill: React.Dispatch<React.SetStateAction<string>>;
-  setTerminalNodeData: React.Dispatch<React.SetStateAction<TerminalNode[]>>;
-  setConsumptionGroupData: React.Dispatch<
-    React.SetStateAction<ConsumptionGroupedByClient[]>
-  >;
+
+  setIsLoading: (value: boolean) => void;
+  setFVKill: (value: string) => void;
+  setTerminalNodeData: (
+    value: TerminalNode[]
+  ) => void;
+  setConsumptionGroupData: (
+    value: ConsumptionGroupedByClient[]
+  ) => void;
+  refreshData: () => Promise<void>;
+  clearData: () => void;
 }
 
-const DataContext = createContext<DataContextType | undefined>(undefined);
+export const useDataStore = create<DataStore>((set) => ({
+  terminalNodeData: [],
+  consumptionGroupData: [],
+  isLoading: false,
+  fvKill: "",
 
-export function DataProvider({ children }: { children: React.ReactNode }) {
-  const [terminalNodeData, setTerminalNodeData] = useState<TerminalNode[]>([]);
-  const [consumptionGroupData, setConsumptionGroupData] = useState<
-    ConsumptionGroupedByClient[]
-  >([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [fvKill, setFVKill] = useState<string>("");
-  const hasFetchedRef = useRef<boolean>(false);
-
-  const fetchData = async () => {
+  setIsLoading: (value) => {
+    set({
+      isLoading: value,
+    });
+  },
+  setFVKill: (value) => {
+    set({
+      fvKill: value,
+    });
+  },
+  setTerminalNodeData: (value) => {
+    set({
+      terminalNodeData: value,
+    });
+  },
+  setConsumptionGroupData: (value) => {
+    set({
+      consumptionGroupData: value,
+    });
+  },
+  refreshData: async () => {
     try {
-      setIsLoading(true);
+      set({
+        isLoading: true,
+      });
 
       const [res1, res2] = await Promise.all([
-        // fetch("/data/terminal_nodes.json"),
-        // fetch("/data/consumption_data.json"),
-        fetch("/data/2026-07-01/filtered_terminal_nodes.json"),
-        fetch("/data/2026-07-01/consumption_data.json"),
-        // fetch("/api/import?type=terminal_nodes", { method: "GET" }),
-        // fetch("/api/import?type=consumptions", { method: "GET" }),
+        fetch(
+          "/data/2026-08-01/filtered_terminal_nodes.json"
+        ),
+
+        fetch(
+          "/data/2026-08-01/consumption_data.json"
+        ),
       ]);
 
-      const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
+      if (!res1.ok) {
+        throw new Error(
+          `Failed to fetch terminal nodes: ${res1.status} ${res1.statusText}`
+        );
+      }
 
-      setTerminalNodeData(data1);
-      setConsumptionGroupData(data2);
+      if (!res2.ok) {
+        throw new Error(
+          `Failed to fetch consumption data: ${res2.status} ${res2.statusText}`
+        );
+      }
+
+      const [data1, data2] = await Promise.all([
+        res1.json() as Promise<TerminalNode[]>,
+
+        res2.json() as Promise<
+          ConsumptionGroupedByClient[]
+        >,
+      ]);
+
+      set({
+        terminalNodeData: data1,
+      });
+
+      await new Promise<void>((resolve) => {
+        setTimeout(resolve, 0);
+      });
+
+      set({
+        consumptionGroupData: data2,
+      });
 
       toast.success("Data loaded successfully!");
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(
+        "Error loading application data:",
+        error
+      );
+
       toast.error("Failed to load data");
     } finally {
-      setIsLoading(false);
+      set({
+        isLoading: false,
+      });
     }
-  };
+  },
+
+  clearData: () => {
+    set({
+      terminalNodeData: [],
+      consumptionGroupData: [],
+    });
+  },
+}));
+
+// ============================================================
+// Data Context
+// ============================================================
+//
+// The Context is now only a compatibility layer.
+//
+// Zustand actually stores all the state.
+// This means you can keep:
+//
+// <DataProvider>
+//   {children}
+// </DataProvider>
+//
+// without needing React Context for state management.
+// ============================================================
+
+export function DataProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const hasFetchedRef = useRef(false);
+
+  const refreshData = useDataStore(
+    (state) => state.refreshData
+  );
 
   useEffect(() => {
-    if (hasFetchedRef.current) return;
+    if (hasFetchedRef.current) {
+      return;
+    }
 
     hasFetchedRef.current = true;
-    fetchData();
-  }, []);
 
-  return (
-    <DataContext.Provider
-      value={{
-        terminalNodeData,
-        consumptionGroupData,
-        isLoading,
-        setIsLoading,
-        refreshData: fetchData,
-        fvKill,
-        setFVKill,
-        setTerminalNodeData,
-        setConsumptionGroupData,
-      }}
-    >
-      {children}
-    </DataContext.Provider>
-  );
+    refreshData();
+  }, [refreshData]);
+
+  return <>{children}</>;
 }
 
+// ============================================================
+// useData
+// ============================================================
+//
+// Keeps your existing API.
+//
+// Existing code:
+//
+// const {
+//   terminalNodeData,
+//   consumptionGroupData,
+//   isLoading,
+//   refreshData,
+// } = useData();
+//
+// continues to work.
+// ============================================================
+
 export function useData() {
-  const context = useContext(DataContext);
-
-  if (!context) {
-    throw new Error("useData must be used inside DataProvider");
-  }
-
-  return context;
+  return useDataStore();
 }
