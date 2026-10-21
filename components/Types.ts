@@ -146,6 +146,8 @@ export interface AnalyticsProps {
   topDownload: EnrichedTerminalNode[];
   upload95: number;
   download95: number;
+  zeroBytesUpload: EnrichedTerminalNode[];
+  zeroBytesDownload: EnrichedTerminalNode[];
 }
 
 export interface ConsumptionRequestBody {

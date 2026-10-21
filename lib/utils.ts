@@ -105,3 +105,37 @@ export const percentile = (arr: number[], p: number) => {
 
   return sorted[index] ?? 0;
 };
+
+export function isWithinDateRange(
+  consumptionDay: string,
+  startDate?: Date,
+  endDate?: Date,
+): boolean {
+  // Parse date-only values as local dates to avoid UTC shifts.
+  const parts = consumptionDay.slice(0, 10).split("-").map(Number);
+
+  if (parts.length !== 3 || parts.some(Number.isNaN)) {
+    return false;
+  }
+
+  const rowDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+  const start = startDate
+    ? new Date(
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate(),
+      )
+    : null;
+
+  const end = endDate
+    ? new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate())
+    : null;
+
+  if (start && rowDate < start) return false;
+
+  // Inclusive end date, even if endDate has a time component.
+  if (end && rowDate > end) return false;
+
+  return true;
+}
