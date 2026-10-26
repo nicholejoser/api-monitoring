@@ -1,12 +1,10 @@
-import { cookies, headers } from "next/headers";
-import { User } from "../../components/Types";
+import { cookies } from "next/headers";
 import Sidebar from "../../components/Sidebar";
 import Header from "@/components/Header";
-import jwt from "jsonwebtoken";
 import { DataProvider } from "@/context/DataContext";
 import { redirect } from "next/navigation";
-import { toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { getCurrentUser } from "@/lib/auth";
 
 export default async function DashboardLayout({
   children,
@@ -14,67 +12,32 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-  const headerList = await headers();
-
-  const host = headerList.get("host");
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-
-  const baseUrl = `${protocol}://${host}`;
 
   const token = cookieStore.get("WTBkR2VWbFhNVFk9")?.value;
-  let currentUser = null;
-  let fiberKill = null;
+
   if (!token) {
     redirect("/");
   }
+
+  if (!token) {
+    redirect("/");
+  }
+  let currentUser = null;
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
-      id: string;
-    };
-    const payload = {
-      username: "broadband_api",
-      password: "broadband_api",
-    };
-    const [localRes, fiberRes] = await Promise.all([
-      fetch(`${baseUrl}/api/users`, {
-        method: "GET",
-        cache: "no-store",
-      }),
-      fetch(`${baseUrl}/api/requests?type=fibervu-login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-        cache: "no-store",
-      }),
-    ]);
+    currentUser = await getCurrentUser();
 
-    const localData = await localRes.json();
-    const fiberData = await fiberRes.json();
-
-    if (!localRes.ok || !fiberRes.ok) {
-      toast.error("Failed to sign in.");
+    if (!currentUser) {
       redirect("/");
-    }
-
-    if (!Array.isArray(localData)) {
-      console.error("Users is not an array:", localData);
-      return;
-    }
-    const foundUser = localData.find(
-      (u: User) => String(u.id) === String(decoded.id),
-    );
-    if (foundUser) {
-      currentUser = foundUser;
-      fiberKill = fiberData.token.id;
     }
   } catch (error) {
     console.error("Invalid token:", error);
+    redirect("/");
   }
-
+  const fiberKill = cookieStore.get("fiberVuToken")?.value ?? "";
   return (
-    <DataProvider>
+    <DataProvider currentUser={currentUser} fiberData={fiberKill}>
       <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">
-        <Sidebar currentUser={currentUser} fiberKill={fiberKill} />
+        <Sidebar fiberKill={fiberKill} />
         <div className="flex flex-col flex-1">
           <Header />
           <main className="p-6 overflow-y-auto">

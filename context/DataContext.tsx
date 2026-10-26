@@ -1,6 +1,10 @@
 "use client";
 
-import { ConsumptionGroupedByClient, TerminalNode } from "@/components/Types";
+import {
+  ConsumptionGroupedByClient,
+  TerminalNode,
+  UserTypes,
+} from "@/components/Types";
 import React, {
   createContext,
   useContext,
@@ -22,11 +26,21 @@ interface DataContextType {
   setConsumptionGroupData: React.Dispatch<
     React.SetStateAction<ConsumptionGroupedByClient[]>
   >;
+  currentUser: UserTypes;
+  fiberData: any;
 }
-
+interface DataProviderProps {
+  children: React.ReactNode;
+  currentUser: UserTypes;
+  fiberData: any;
+}
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-export function DataProvider({ children }: { children: React.ReactNode }) {
+export function DataProvider({
+  children,
+  currentUser,
+  fiberData,
+}: DataProviderProps) {
   const [terminalNodeData, setTerminalNodeData] = useState<TerminalNode[]>([]);
   const [consumptionGroupData, setConsumptionGroupData] = useState<
     ConsumptionGroupedByClient[]
@@ -74,6 +88,8 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
       value={{
         terminalNodeData,
         consumptionGroupData,
+        currentUser,
+        fiberData,
         isLoading,
         setIsLoading,
         refreshData: fetchData,

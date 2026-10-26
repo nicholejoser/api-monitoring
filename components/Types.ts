@@ -128,14 +128,24 @@ export interface TerminalNode {
   voipProviderId: string;
   wifi: boolean;
 }
-
-export interface User {
-  email: string;
-  id: string;
-  name: string;
-  password: string;
+export interface RoleTypes {
+  id: number;
   role: string;
+  createdAt: Date;
+  updatedAt: Date | null;
+}
+export interface UserTypes {
+  id: number;
   username: string;
+  email: string;
+  firstname: string;
+  password: string;
+  lastname: string;
+  suffix?: string | null;
+  receiveAlarmEmail: boolean;
+  createdAt: Date;
+  updatedAt: Date | null;
+  roles: RoleTypes;
 }
 export interface EnrichedTerminalNode extends TerminalNode {
   totalUp: number;

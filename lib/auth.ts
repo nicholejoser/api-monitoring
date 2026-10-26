@@ -1,12 +1,14 @@
-import jwt, { JwtPayload } from "jsonwebtoken";
-
+import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { prisma } from "./prisma";
 /**
  * Strongly typed JWT payload
  */
 export interface AuthTokenPayload extends JwtPayload {
-  id: string;
-  username: string;
-  role: string;
+  id: number;
+  email: string;
+  role: number;
 }
 
 /**
@@ -25,11 +27,17 @@ function getJwtSecret(): string {
 /**
  * Sign Token
  */
-export function signToken(payload: AuthTokenPayload): string {
-  return jwt.sign(payload, getJwtSecret(), {
-    expiresIn: "1d",
-  });
+export function signToken(
+  payload: AuthTokenPayload,
+  expiresIn: SignOptions["expiresIn"] = "1d",
+): string {
+  const options: SignOptions = {
+    expiresIn,
+  };
+
+  return jwt.sign(payload, getJwtSecret(), options);
 }
+
 
 /**
  * Verify Token
@@ -40,4 +48,46 @@ export function verifyToken(token: string): AuthTokenPayload | null {
   } catch {
     return null;
   }
+}
+
+export async function getCurrentUser() {
+  const token = (await cookies()).get("WVRKc2MySkJQVDA9")?.value;
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = verifyToken(token);
+
+    if (!payload) {
+      return null;
+    }
+    return await prisma.users.findUnique({
+      where: {
+        id: Number(payload.id),
+      },
+      include: {
+        roles: true,
+      },
+    });
+  } catch {
+    return null;
+  }
+}
+
+export async function requireRole(allowedRoles: string[]) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    redirect("/");
+  }
+
+  const userRole = user.roles?.role;
+
+  if (!userRole || !allowedRoles.includes(userRole)) {
+    redirect("/dashboard");
+  }
+
+  return user;
 }

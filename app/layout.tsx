@@ -12,7 +12,7 @@ const lexend = Lexend({
 });
 
 export const metadata: Metadata = {
-  title: "DCS | FiberVU",
+  title: "DCS",
   description: "Data Control System",
 };
 

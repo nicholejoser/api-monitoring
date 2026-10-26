@@ -15,7 +15,6 @@ import {
   Logs,
 } from "lucide-react";
 import { toast } from "sonner";
-import { User } from "./Types";
 import {
   Accordion,
   AccordionContent,
@@ -56,11 +55,10 @@ export const menuItems = [
   },
 ];
 interface SidebarProps {
-  currentUser: Partial<User> | null;
   fiberKill: string;
 }
-export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
-  const { setFVKill } = useData();
+export default function Sidebar({ fiberKill }: SidebarProps) {
+  const { setFVKill, currentUser } = useData();
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
@@ -89,7 +87,8 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
     }
   }, [fiberKill, setFVKill]);
   const filteredMenu = menuItems.filter(
-    (item) => !item.roles || item.roles.includes(currentUser?.role ?? ""),
+    (item) =>
+      !item.roles || item.roles.includes(currentUser?.roles?.role ?? ""),
   );
   return (
     <aside
@@ -104,7 +103,9 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
   `}
     >
       {/* ================= LOGO ================= */}
-      <div className={`flex items-center gap-3 px-6 border-b border-gray-200 ${!collapsed ? "py-3.25": "py-3.5"}`}>
+      <div
+        className={`flex items-center gap-3 px-6 border-b border-gray-200 ${!collapsed ? "py-3.25" : "py-3.5"}`}
+      >
         <div className="w-10 h-10 bg-linear-to-br from-[#0ea5e9] to-indigo-600 rounded-xl flex items-center justify-center shadow-md">
           <Coffee className="w-5 h-5 text-white" />
         </div>
@@ -113,7 +114,7 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
           <div>
             <h1 className=" font-semibold text-lg tracking-wide">DCS</h1>
             <p className="text-gray-500 text-xs tracking-wide capitalize">
-              {currentUser?.role} Dashboard
+              {currentUser?.roles?.role} Dashboard
             </p>
           </div>
         )}
@@ -316,15 +317,15 @@ export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
         <div className="px-4 py-4 border-t border-gray-200">
           <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl">
             <div className="w-10 h-10 bg-linear-to-br from-indigo-500 to-violet-600 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow">
-              {currentUser?.name?.charAt(0) ?? "U"}
+              {currentUser?.firstname?.charAt(0) ?? "U"}
             </div>
 
             <div className="flex-1 min-w-0">
               <p className="text-gray-900 text-sm font-medium truncate">
-                {currentUser?.name}
+                {currentUser?.firstname}
               </p>
               <p className="text-gray-500 text-xs capitalize">
-                {currentUser?.role}
+                {currentUser?.roles?.role}
               </p>
             </div>
           </div>

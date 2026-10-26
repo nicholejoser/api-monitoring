@@ -14,28 +14,32 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+    setError("");
     const toastID = toast.loading("Signing in..");
+    const newUsername = username.trim();
+    const newPassword = password.trim();
     try {
-      const res = await fetch("/api/requests?type=login", {
+      const res = await fetch("/api/auth/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ username: newUsername, password: newPassword }),
       });
+      const data = await res.json();
       if (!res.ok) {
-        toast.error("Invalid username or password.");
-
+        toast.error(data.message, {
+          description: "Incorrect username or password.",
+        });
         setLoading(false);
         return;
       }
       toast.dismiss(toastID);
-      router.push("/dashboard");
-      router.refresh();
+      router.replace("/dashboard");
     } catch {
       toast.error("Something went wrong. Try again.");
+      setLoading(false);
     } finally {
       toast.dismiss(toastID);
     }

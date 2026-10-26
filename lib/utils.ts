@@ -105,3 +105,16 @@ export const percentile = (arr: number[], p: number) => {
 
   return sorted[index] ?? 0;
 };
+
+export const oneEncode = (value: string): string => {
+  return btoa(value);
+};
+export const tripleEncode = (value: string): string => {
+  return btoa(btoa(btoa(value)));
+};
+export const oneDecode = (value: string): string => {
+  return atob(value);
+};
+export const tripleDecode = (value: string): string => {
+  return atob(atob(atob(value)));
+};
