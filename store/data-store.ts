@@ -3,10 +3,8 @@
 import { create } from "zustand";
 import { toast } from "sonner";
 
-import {
-  ConsumptionGroupedByClient,
-  TerminalNode,
-} from "@/components/Types";
+import { ConsumptionGroupedByClient, TerminalNode } from "@/components/Types";
+import { redirect } from "next/navigation";
 
 interface DataStore {
   terminalNodeData: TerminalNode[];
@@ -20,9 +18,7 @@ interface DataStore {
 
   setTerminalNodeData: (data: TerminalNode[]) => void;
 
-  setConsumptionGroupData: (
-    data: ConsumptionGroupedByClient[]
-  ) => void;
+  setConsumptionGroupData: (data: ConsumptionGroupedByClient[]) => void;
 
   refreshData: (date: string) => Promise<void>;
 
@@ -62,37 +58,19 @@ export const useDataStore = create<DataStore>((set) => ({
         isLoading: true,
       });
 
-      const [terminalResponse, consumptionResponse] =
-        await Promise.all([
-          fetch(
-            `/data/${date}/filtered_terminal_nodes.json`
-          ),
-          fetch(
-            `/data/${date}/consumption_data.json`
-          ),
-        ]);
+      const [terminalResponse, consumptionResponse] = await Promise.all([
+        fetch(`/data/${date}/filtered_terminal_nodes.json`),
+        fetch(`/data/${date}/consumption_data.json`),
+      ]);
 
-      if (!terminalResponse.ok) {
-        throw new Error(
-          `Terminal nodes request failed: ${terminalResponse.status}`
-        );
+      if (!terminalResponse.ok || !consumptionResponse.ok) {
+        redirect("/");
       }
 
-      if (!consumptionResponse.ok) {
-        throw new Error(
-          `Consumption request failed: ${consumptionResponse.status}`
-        );
-      }
-
-      const [
-        terminalData,
-        consumptionData,
-      ] = await Promise.all([
+      const [terminalData, consumptionData] = await Promise.all([
         terminalResponse.json() as Promise<TerminalNode[]>,
 
-        consumptionResponse.json() as Promise<
-          ConsumptionGroupedByClient[]
-        >,
+        consumptionResponse.json() as Promise<ConsumptionGroupedByClient[]>,
       ]);
 
       // ------------------------------------------
@@ -118,10 +96,7 @@ export const useDataStore = create<DataStore>((set) => ({
 
       toast.success("Data loaded successfully!");
     } catch (error) {
-      console.error(
-        "Failed to load selected data:",
-        error
-      );
+      console.error("Failed to load selected data:", error);
 
       toast.error("Failed to load selected data");
 
