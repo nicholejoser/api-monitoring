@@ -104,6 +104,7 @@ export function DataProvider({
   );
 }
 
+// Compatibility hook
 export function useData() {
   const context = useContext(DataContext);
 

@@ -58,14 +58,8 @@ export const menuItems = [
 interface SidebarProps {
   fiberKill: string;
 }
-<<<<<<< HEAD
 export default function Sidebar({ fiberKill }: SidebarProps) {
-  const { setFVKill, currentUser } = useData();
-=======
-
-export default function Sidebar({ currentUser, fiberKill }: SidebarProps) {
-  const { setFVKill } = useData();
->>>>>>> 03372eb (update: optimize data fetching with useRef to prevent redundant calls)
+  const { setFVKill,currentUser } = useData();
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
