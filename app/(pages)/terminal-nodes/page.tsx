@@ -8,48 +8,50 @@ import { useData } from "@/context/DataContext";
 import { getEndOfMonth, getStartOfMonth } from "@/lib/utils";
 import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function TerminalNodesAll() {
-  const {
-    terminalNodeData,
-    consumptionGroupData,
-    isLoading,
-    setIsLoading,
-    setTerminalNodeData,
-    setConsumptionGroupData,
-    fvKill,
-  } = useData();
+  const { terminalNodeData, consumptionGroupData, isLoading, fvKill } =
+    useData();
+
   const [startDate, setStartDate] = useState<Date | undefined>(
     getStartOfMonth(),
   );
+
   const [endDate, setEndDate] = useState<Date | undefined>(getEndOfMonth());
+
   const router = useRouter();
+
   const [files, setFiles] = useState<string[]>([]);
+
   const [selected, setSelected] = useState<string>("");
 
+  const hasFetchedRef = useRef<boolean>(false);
+
   useEffect(() => {
-    let isMounted = true;
+    if (hasFetchedRef.current) return;
+
+    hasFetchedRef.current = true;
 
     const loadFiles = async () => {
       try {
         const res = await fetch("/api/data-files");
+
+        if (!res.ok) {
+          throw new Error(`Failed to load files: ${res.status}`);
+        }
+
         const data = await res.json();
 
-        if (isMounted) {
-          setFiles(data);
-        }
-      } catch {
+        setFiles(data);
+      } catch (error) {
+        console.error(error);
         toast.error("Failed loading data options");
       }
     };
 
     loadFiles();
-
-    return () => {
-      isMounted = false;
-    };
   }, []);
 
   return (
@@ -71,13 +73,9 @@ export default function TerminalNodesAll() {
               files={files}
               selected={selected}
               setSelected={setSelected}
-              setIsLoading={setIsLoading}
-              setTerminalNodeData={setTerminalNodeData}
-              setConsumptionGroupData={setConsumptionGroupData}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
             />
-
             <button
               onClick={() => router.push("/terminal-nodes/settings")}
               disabled={!fvKill}
@@ -107,8 +105,6 @@ export default function TerminalNodesAll() {
           </div>
         </div>
       </div>
-
-      
     </div>
   );
 }

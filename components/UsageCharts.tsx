@@ -45,7 +45,8 @@ export default function UsageChart({
             {title}
           </p>
           <h2 className="text-lg font-bold text-gray-800">
-            {clientData?.name ?? "Unknown Client"}
+            {clientData?.name.split(":")[0] ?? "Unknown Client"}
+             : {clientData?.clientId ?? "Unknown client ID"}
           </h2>
         </div>
 

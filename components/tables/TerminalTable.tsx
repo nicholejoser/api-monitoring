@@ -15,27 +15,27 @@ import {
   SelectValue,
 } from "../ui/select";
 import { DialogScrollableContent } from "../DialogScrollableContent";
-import { formatBytes } from "../../lib/utils";
+import { formatBytes, isWithinDateRange } from "../../lib/utils";
 import { ChevronDown, ChevronUp, DatabaseSearch, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";
 interface TerminalTableProps {
   terminalNodedata: TerminalNode[];
   consumptionData: ConsumptionGroupedByClient[];
-  selectedDate?: string | null;
   startDate: Date | undefined;
   endDate: Date | undefined;
   setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
   setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  tabType?:string;
 }
 export default function TerminalTable({
   terminalNodedata,
   consumptionData,
-  selectedDate,
   startDate,
   endDate,
   setStartDate,
   setEndDate,
+  tabType
 }: TerminalTableProps) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -49,10 +49,7 @@ export default function TerminalTable({
     key: string;
     direction: "asc" | "desc";
   } | null>(null);
-  const normalizeDate = (date: Date) => {
-    const d = new Date(date);
-    return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  };
+ 
   const consumptionMap = useMemo(() => {
     const map: Record<number, DailyConsumption[]> = {};
 
@@ -83,28 +80,11 @@ export default function TerminalTable({
   
   const enrichedData = useMemo(() => {
     return filteredData.map((item) => {
+      
       const clientConsumption = consumptionMap[item.clientId] || [];
-      const filteredConsumption = clientConsumption.filter((row) => {
-        const rowDate = normalizeDate(new Date(row.consumptionDay));
-
-        if (selectedDate) {
-          const selected = new Date(selectedDate);
-          if (
-            rowDate.getFullYear() !== selected.getFullYear() ||
-            rowDate.getMonth() !== selected.getMonth()
-          ) {
-            return false;
-          }
-        }
-
-        const start = startDate ? normalizeDate(startDate) : null;
-        const end = endDate ? normalizeDate(endDate) : null;
-
-        if (start && rowDate < start) return false;
-        if (end && rowDate > end) return false;
-
-        return true;
-      });
+     const filteredConsumption = clientConsumption.filter((row) =>
+      isWithinDateRange(row.consumptionDay, startDate, endDate)
+    );
 
       const totalUp = filteredConsumption.reduce(
         (sum, row) => sum + Number(row.up),
@@ -121,7 +101,7 @@ export default function TerminalTable({
         totalDown,
       };
     });
-  }, [filteredData, consumptionMap, selectedDate, startDate, endDate]);
+  }, [filteredData, consumptionMap, startDate, endDate]);
 
   const sortData = <T,>(
     array: T[],
@@ -195,7 +175,10 @@ export default function TerminalTable({
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Terminal Data");
 
-    XLSX.writeFile(workbook, `Terminal-Table.xlsx`);
+    XLSX.writeFile(
+         workbook,
+         `${tabType} - ${startDate?.toLocaleDateString("en-CA")} - ${endDate?.toLocaleDateString("en-CA")}.xlsx`,
+       );
   };
 
   return (

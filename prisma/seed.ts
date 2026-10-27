@@ -27,7 +27,7 @@ async function main() {
   }
 
   // Default user credentials
-  const username = "superadmin";
+  const username = "paramz";
   const password = "super@dm!n";
   const email = "superadmin@example.com";
 

@@ -14,8 +14,6 @@ export async function GET(req: NextRequest) {
   const token = searchParams.get("token");
   const reqType = searchParams.get("type");
   const dateFolder = searchParams.get("date");
-  console.log(reqType) 
-  console.log(dateFolder) 
   if (!token) {
     return NextResponse.json({ error: "Missing token" }, { status: 401 });
   }
@@ -29,7 +27,6 @@ export async function GET(req: NextRequest) {
     );
     const raw = fs.readFileSync(filePath, "utf-8");
     const data: TerminalNode[] = JSON.parse(raw);
-    console.log(data)
     return NextResponse.json(data);
   } else {
     if (isRunning) {

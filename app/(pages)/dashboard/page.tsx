@@ -1,6 +1,11 @@
 "use client";
 import { useState, useMemo } from "react";
-import { getEndOfLastMonth, getStartOfLastMonth, percentile } from "../../../lib/utils";
+import {
+  getEndOfLastMonth,
+  getStartOfLastMonth,
+  isWithinDateRange,
+  percentile,
+} from "../../../lib/utils";
 
 import { DailyConsumption } from "../../../components/Types";
 import Loading from "@/components/Loading";
@@ -55,98 +60,13 @@ export default function Dashboard() {
   }, [consumptionGroupData]);
   // 🔍 Filtered data
 
-  // const enrichedData = useMemo(() => {
-  //   return terminalNodeData.map((item) => {
-  //     const clientConsumption = consumptionMap[item.clientId] || [];
-
-  //     const filteredConsumption = clientConsumption.filter((row) => {
-  //       if (!startDate && !endDate) return true;
-
-  //       const rowDate = new Date(row.consumptionDay);
-
-  //       if (startDate && rowDate < startDate) return false;
-  //       if (endDate && rowDate > endDate) return false;
-
-  //       return true;
-  //     });
-
-  //     const totalUp = filteredConsumption.reduce(
-  //       (sum, row) => sum + Number(row.up),
-  //       0,
-  //     );
-
-  //     const totalDown = filteredConsumption.reduce(
-  //       (sum, row) => sum + Number(row.down),
-  //       0,
-  //     );
-
-  //     return {
-  //       ...item,
-  //       totalUp,
-  //       totalDown,
-  //     };
-  //   });
-  // }, [terminalNodeData, consumptionMap, startDate, endDate]);
-
-  // const analytics = useMemo(() => {
-  //   if (!enrichedData.length) {
-  //     return {
-  //       topUpload: [],
-  //       topDownload: [],
-  //       upload95: 0,
-  //       download95: 0,
-  //     };
-  //   }
-
-  //   const topUpload = [...enrichedData]
-  //     .sort((a, b) => b.totalUp - a.totalUp)
-  //     .slice(0, 20000);
-
-  //   const topDownload = [...enrichedData]
-  //     .sort((a, b) => b.totalDown - a.totalDown)
-  //     .slice(0, 20000);
-
-  //   const percentile = (arr: number[], p: number) => {
-  //     if (!arr.length) return 0;
-
-  //     const sorted = [...arr].sort((a, b) => a - b);
-  //     const index = Math.ceil((p / 100) * sorted.length) - 1;
-
-  //     return sorted[index] ?? 0;
-  //   };
-
-  //   const upload95 = percentile(
-  //     enrichedData.map((d) => d.totalUp),
-  //     95,
-  //   );
-
-  //   const download95 = percentile(
-  //     enrichedData.map((d) => d.totalDown),
-  //     95,
-  //   );
-
-  //   return {
-  //     topUpload,
-  //     topDownload,
-  //     upload95,
-  //     download95,
-  //   };
-  // }, [enrichedData]);
-
   const enrichedData = useMemo(() => {
     return terminalNodeData.map((item) => {
       const clientConsumption = consumptionMap[item.clientId] || [];
 
-      const filteredConsumption = clientConsumption.filter((row) => {
-        if (!startDate && !endDate) return true;
-
-        const rowDate = new Date(row.consumptionDay);
-
-        if (startDate && rowDate < startDate) return false;
-        if (endDate && rowDate > endDate) return false;
-
-        return true;
-      });
+      const filteredConsumption = clientConsumption.filter((row) =>
+        isWithinDateRange(row.consumptionDay, startDate, endDate),
+      );
 
       // per-day values (important change)
       const upValues = filteredConsumption.map((row) => Number(row.up));
@@ -174,6 +94,8 @@ export default function Dashboard() {
       return {
         topUpload: [],
         topDownload: [],
+        zeroBytesUpload: [],
+        zeroBytesDownload: [],
         upload95: 0,
         download95: 0,
       };
@@ -181,11 +103,11 @@ export default function Dashboard() {
 
     const topUpload = [...enrichedData]
       .sort((a, b) => b.totalUp - a.totalUp)
-      .slice(0, 20000);
+      .slice(0, 1000);
 
     const topDownload = [...enrichedData]
       .sort((a, b) => b.totalDown - a.totalDown)
-      .slice(0, 20000);
+      .slice(0, 1000);
 
     const upload95 =
       enrichedData.reduce((sum, d) => sum + d.upload95, 0) /
@@ -195,11 +117,17 @@ export default function Dashboard() {
       enrichedData.reduce((sum, d) => sum + d.download95, 0) /
       enrichedData.length;
 
+    const zeroBytesUpload = enrichedData.filter((d) => d.totalUp === 0);
+
+    const zeroBytesDownload = enrichedData.filter((d) => d.totalDown === 0);
+
     return {
       topUpload,
       topDownload,
       upload95,
       download95,
+      zeroBytesUpload,
+      zeroBytesDownload,
     };
   }, [enrichedData]);
 

@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
-import { useData } from "@/context/DataContext";
 import TerminalTable from "./TerminalTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Download, Upload } from "lucide-react";
@@ -9,6 +8,7 @@ import { formatBytes } from "@/lib/utils";
 import TerminalNodesList from "../TerminalNodesList";
 import { toast } from "sonner";
 import TerminalPercentileTable from "./TerminalPercentileTable";
+import { useDataStore } from "@/store/data-store";
 
 export default function TerminalTableDashboard({
   analytics,
@@ -23,13 +23,12 @@ export default function TerminalTableDashboard({
   endDate: Date | undefined;
   setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }) {
-  const {
-    terminalNodeData,
-    consumptionGroupData,
-    setIsLoading,
-    setConsumptionGroupData,
-    setTerminalNodeData,
-  } = useData();
+  const terminalNodeData = useDataStore((state) => state.terminalNodeData);
+
+  const consumptionGroupData = useDataStore(
+    (state) => state.consumptionGroupData,
+  );
+
   const [tabType, setTabType] = useState<string>("all");
   const [files, setFiles] = useState<string[]>([]);
   const [selected, setSelected] = useState<string>("");
@@ -86,9 +85,6 @@ export default function TerminalTableDashboard({
               files={files}
               selected={selected}
               setSelected={setSelected}
-              setIsLoading={setIsLoading}
-              setTerminalNodeData={setTerminalNodeData}
-              setConsumptionGroupData={setConsumptionGroupData}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
             />
@@ -101,54 +97,67 @@ export default function TerminalTableDashboard({
                 All
               </TabsTrigger>
               <TabsTrigger
-                value="upload"
-                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "upload" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
+                value="Top 1k Upload"
+                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "Top 1k Upload" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
               >
                 <Upload className="w-4 h-4" />
-                Top 20k Upload
+                Top 1k UL
               </TabsTrigger>
 
               <TabsTrigger
-                value="download"
-                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "download" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
+                value="Top 1k Download"
+                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "Top 1k Download" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
               >
                 <Download className="w-4 h-4" />
-                Top 20k Download
+                Top 1k DL
               </TabsTrigger>
 
               <TabsTrigger
-                value="percentile"
-                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "percentile" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
+                value="95th Percentile"
+                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "95th Percentile" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
               >
                 <BarChart3 className="w-4 h-4" />
                 95th Percentile
               </TabsTrigger>
+              <TabsTrigger
+                value="0B Upload"
+                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "0B Upload" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
+              >
+                <Upload className="w-4 h-4" />
+                0B UL
+              </TabsTrigger>
+              <TabsTrigger
+                value="0B Download"
+                className={`flex items-center gap-2 px-5 py-2 rounded-lg text-sm font-medium text-gray-600 transition-all ${tabType === "0B Download" ? "bg-[#0ea5e9]! shadow-sm text-white!" : "hover:bg-gray-200 text-gray-600"} cursor-pointer`}
+              >
+                <Download className="w-4 h-4" />
+                0B DL
+              </TabsTrigger>
             </TabsList>
           </div>
-
-          <TabsContent value="upload">
+          <TabsContent value="Top 1k Upload">
             <TerminalTable
               terminalNodedata={analytics.topUpload}
               consumptionData={consumptionGroupData}
-              selectedDate={selectedDate}
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
+              tabType={tabType}
             />
           </TabsContent>
-          <TabsContent value="download">
+          <TabsContent value="Top 1k Download">
             <TerminalTable
               terminalNodedata={analytics.topDownload}
               consumptionData={consumptionGroupData}
-              selectedDate={selectedDate}
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
+              tabType={tabType}
             />
           </TabsContent>
-          <TabsContent value="percentile">
+          <TabsContent value="95th Percentile">
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
               <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wider mb-6">
                 95th Percentile Analysis
@@ -192,6 +201,29 @@ export default function TerminalTableDashboard({
               endDate={endDate}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
+              tabType={tabType}
+            />
+          </TabsContent>
+          <TabsContent value="0B Upload">
+            <TerminalTable
+              terminalNodedata={analytics.zeroBytesUpload}
+              consumptionData={consumptionGroupData}
+              startDate={startDate}
+              endDate={endDate}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+              tabType={tabType}
+            />
+          </TabsContent>
+          <TabsContent value="0B Download">
+            <TerminalTable
+              terminalNodedata={analytics.zeroBytesDownload}
+              consumptionData={consumptionGroupData}
+              startDate={startDate}
+              endDate={endDate}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+              tabType={tabType}
             />
           </TabsContent>
         </Tabs>
