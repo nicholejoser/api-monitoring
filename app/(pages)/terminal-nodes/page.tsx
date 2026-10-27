@@ -12,38 +12,45 @@ import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function TerminalNodesAll() {
-  const {
-    terminalNodeData,
-    consumptionGroupData,
-    isLoading,
-    setIsLoading,
-    setTerminalNodeData,
-    setConsumptionGroupData,
-    fvKill,
-  } = useData();
+  const { terminalNodeData, consumptionGroupData, isLoading, fvKill } =
+    useData();
+
   const [startDate, setStartDate] = useState<Date | undefined>(
     getStartOfMonth(),
   );
+
   const [endDate, setEndDate] = useState<Date | undefined>(getEndOfMonth());
+
   const router = useRouter();
+
   const [files, setFiles] = useState<string[]>([]);
+
   const [selected, setSelected] = useState<string>("");
+
   const hasFetchedRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (hasFetchedRef.current) return;
+
     hasFetchedRef.current = true;
 
     const loadFiles = async () => {
       try {
         const res = await fetch("/api/data-files");
+
+        if (!res.ok) {
+          throw new Error(`Failed to load files: ${res.status}`);
+        }
+
         const data = await res.json();
 
         setFiles(data);
-      } catch {
+      } catch (error) {
+        console.error(error);
         toast.error("Failed loading data options");
       }
     };
+
     loadFiles();
   }, []);
 
@@ -66,13 +73,9 @@ export default function TerminalNodesAll() {
               files={files}
               selected={selected}
               setSelected={setSelected}
-              setIsLoading={setIsLoading}
-              setTerminalNodeData={setTerminalNodeData}
-              setConsumptionGroupData={setConsumptionGroupData}
               setStartDate={setStartDate}
               setEndDate={setEndDate}
             />
-
             <button
               onClick={() => router.push("/terminal-nodes/settings")}
               disabled={!fvKill}

@@ -15,74 +15,38 @@ import {
   getEndOfMonth,
   getStartOfMonth,
 } from "@/lib/utils";
-import { ConsumptionGroupedByClient, TerminalNode } from "./Types";
-import { toast } from "sonner";
+import { useDataStore } from "@/store/data-store";
 
 interface TerminalNodesListProps {
   files: string[];
   selected: string;
+
   setSelected: React.Dispatch<React.SetStateAction<string>>;
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  setTerminalNodeData: React.Dispatch<React.SetStateAction<TerminalNode[]>>;
-  setConsumptionGroupData: React.Dispatch<
-    React.SetStateAction<ConsumptionGroupedByClient[]>
-  >;
   setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
   setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }
+
 export default function TerminalNodesList({
   files,
   selected,
   setSelected,
-  setIsLoading,
-  setTerminalNodeData,
-  setConsumptionGroupData,
   setStartDate,
   setEndDate,
 }: TerminalNodesListProps) {
-  const [open, setOpen] = useState<boolean>(false);
-  const hasFetchedRef = React.useRef<boolean>(false);
+  const [open, setOpen] = useState(false);
+
+  const refreshData = useDataStore((state) => state.refreshData);
+
   useEffect(() => {
     if (!selected) return;
-    if (hasFetchedRef.current) return;
-    hasFetchedRef.current = true;
-    const fetchSelectedData = async () => {
-      try {
-        setIsLoading(true);
-        const date = new Date(selected);
-        setStartDate(getStartOfMonth(date));
-        setEndDate(getEndOfMonth(date));
-        const [terminalRes, consumptionRes] = await Promise.all([
-          fetch(`/data/${selected}/filtered_terminal_nodes.json`),
-          fetch(`/data/${selected}/consumption_data.json`),
-        ]);
 
-        const [terminalData, consumptionData] = await Promise.all([
-          terminalRes.json(),
-          consumptionRes.json(),
-        ]);
+    const date = new Date(selected);
 
-        setTerminalNodeData(terminalData);
-        setConsumptionGroupData(consumptionData);
+    setStartDate(getStartOfMonth(date));
+    setEndDate(getEndOfMonth(date));
 
-        toast.success("Data loaded successfully!");
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load selected data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSelectedData();
-  }, [
-    selected,
-    setConsumptionGroupData,
-    setEndDate,
-    setIsLoading,
-    setStartDate,
-    setTerminalNodeData,
-  ]);
+    refreshData(selected);
+  }, [selected, refreshData, setStartDate, setEndDate]);
   return (
     <div>
       <Popover open={open} onOpenChange={setOpen}>

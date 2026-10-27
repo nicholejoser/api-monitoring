@@ -75,7 +75,7 @@ export default function TerminalPercentileTable({
         statusFilter === "all" || item.status === statusFilter;
       const matchPackage =
         packageFilter === "all" ||
-        !(item.packageName ?? "")
+        (item.packageName ?? "")
           .toLowerCase()
           .includes(packageFilter.toLowerCase());
 
