@@ -38,11 +38,11 @@ export type UsersSumAggregateOutputType = {
 
 export type UsersMinAggregateOutputType = {
   id: number | null
-  username: string
-  firstname: string
-  lastname: string 
-  email: string
-  password: string
+  username: string | null
+  firstname: string | null
+  lastname: string | null
+  email: string | null
+  password: string | null
   createdAt: Date | null
   role_id: number | null
   suffix: string | null
