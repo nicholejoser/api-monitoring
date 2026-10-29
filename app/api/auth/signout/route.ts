@@ -15,6 +15,7 @@ export async function POST(req: NextRequest) {
 
   const cookieStore = await cookies();
   const kill = tripleEncode("kill");
+  const kill2 = tripleEncode("fiberKill");
 
   // Delete authentication cookie
   cookieStore.set(kill, "", {
@@ -24,8 +25,16 @@ export async function POST(req: NextRequest) {
     path: "/",
     expires: new Date(0),
   });
+  cookieStore.set(kill2, "", {
+    httpOnly: true,
+    secure: false,
+    sameSite: "lax",
+    path: "/",
+    expires: new Date(0),
+  });
 
   cookieStore.delete(kill);
+  cookieStore.delete(kill2);
 
   const { ipAddress, userAgent } = getRequestInfo(req);
 
