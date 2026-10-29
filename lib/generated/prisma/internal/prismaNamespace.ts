@@ -400,7 +400,9 @@ export const ModelName = {
   users: 'users',
   roles: 'roles',
   user_logs: 'user_logs',
-  database_backup: 'database_backup'
+  database_backup: 'database_backup',
+  terminal_nodes: 'terminal_nodes',
+  daily_consumption: 'daily_consumption'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -416,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "roles" | "user_logs" | "database_backup"
+    modelProps: "users" | "roles" | "user_logs" | "database_backup" | "terminal_nodes" | "daily_consumption"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -716,6 +718,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    terminal_nodes: {
+      payload: Prisma.$terminal_nodesPayload<ExtArgs>
+      fields: Prisma.terminal_nodesFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.terminal_nodesFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.terminal_nodesFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>
+        }
+        findFirst: {
+          args: Prisma.terminal_nodesFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.terminal_nodesFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>
+        }
+        findMany: {
+          args: Prisma.terminal_nodesFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>[]
+        }
+        create: {
+          args: Prisma.terminal_nodesCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>
+        }
+        createMany: {
+          args: Prisma.terminal_nodesCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.terminal_nodesCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>[]
+        }
+        delete: {
+          args: Prisma.terminal_nodesDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>
+        }
+        update: {
+          args: Prisma.terminal_nodesUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>
+        }
+        deleteMany: {
+          args: Prisma.terminal_nodesDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.terminal_nodesUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.terminal_nodesUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>[]
+        }
+        upsert: {
+          args: Prisma.terminal_nodesUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_nodesPayload>
+        }
+        aggregate: {
+          args: Prisma.Terminal_nodesAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTerminal_nodes>
+        }
+        groupBy: {
+          args: Prisma.terminal_nodesGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Terminal_nodesGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.terminal_nodesCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Terminal_nodesCountAggregateOutputType> | number
+        }
+      }
+    }
+    daily_consumption: {
+      payload: Prisma.$daily_consumptionPayload<ExtArgs>
+      fields: Prisma.daily_consumptionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.daily_consumptionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.daily_consumptionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>
+        }
+        findFirst: {
+          args: Prisma.daily_consumptionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.daily_consumptionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>
+        }
+        findMany: {
+          args: Prisma.daily_consumptionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>[]
+        }
+        create: {
+          args: Prisma.daily_consumptionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>
+        }
+        createMany: {
+          args: Prisma.daily_consumptionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.daily_consumptionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>[]
+        }
+        delete: {
+          args: Prisma.daily_consumptionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>
+        }
+        update: {
+          args: Prisma.daily_consumptionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>
+        }
+        deleteMany: {
+          args: Prisma.daily_consumptionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.daily_consumptionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.daily_consumptionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>[]
+        }
+        upsert: {
+          args: Prisma.daily_consumptionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$daily_consumptionPayload>
+        }
+        aggregate: {
+          args: Prisma.Daily_consumptionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateDaily_consumption>
+        }
+        groupBy: {
+          args: Prisma.daily_consumptionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Daily_consumptionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.daily_consumptionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Daily_consumptionCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -805,6 +955,87 @@ export const Database_backupScalarFieldEnum = {
 } as const
 
 export type Database_backupScalarFieldEnum = (typeof Database_backupScalarFieldEnum)[keyof typeof Database_backupScalarFieldEnum]
+
+
+export const Terminal_nodesScalarFieldEnum = {
+  id: 'id',
+  fiberVuId: 'fiberVuId',
+  cityId: 'cityId',
+  cityName: 'cityName',
+  clientId: 'clientId',
+  clientIdentifier: 'clientIdentifier',
+  clientName: 'clientName',
+  clientOuterIdentifier: 'clientOuterIdentifier',
+  comment: 'comment',
+  contact: 'contact',
+  contract: 'contract',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  createdByName: 'createdByName',
+  customVlanTaggingIptvId: 'customVlanTaggingIptvId',
+  customVlanTaggingNetId: 'customVlanTaggingNetId',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById',
+  email: 'email',
+  fixIp: 'fixIp',
+  hookedAt: 'hookedAt',
+  hookedById: 'hookedById',
+  hookedByName: 'hookedByName',
+  isFtth: 'isFtth',
+  isPppoe: 'isPppoe',
+  isPppoeActive: 'isPppoeActive',
+  language: 'language',
+  mapDataId: 'mapDataId',
+  mapDataName: 'mapDataName',
+  modifiedAt: 'modifiedAt',
+  modifiedById: 'modifiedById',
+  modifiedByName: 'modifiedByName',
+  name: 'name',
+  number: 'number',
+  numberExt: 'numberExt',
+  oltName: 'oltName',
+  onuOltId: 'onuOltId',
+  opticalDeviceId: 'opticalDeviceId',
+  outerIdentity: 'outerIdentity',
+  packageName: 'packageName',
+  password: 'password',
+  phone: 'phone',
+  radiusPassword: 'radiusPassword',
+  radiusUsername: 'radiusUsername',
+  rfEnabled: 'rfEnabled',
+  serialNumber: 'serialNumber',
+  serviceAreaId: 'serviceAreaId',
+  serviceAreaName: 'serviceAreaName',
+  sipData: 'sipData',
+  status: 'status',
+  statusId: 'statusId',
+  statusOperational: 'statusOperational',
+  streetId: 'streetId',
+  streetName: 'streetName',
+  terminalNodeOltId: 'terminalNodeOltId',
+  todoCount: 'todoCount',
+  todoTaskIds: 'todoTaskIds',
+  tr069Enabled: 'tr069Enabled',
+  voipProvider: 'voipProvider',
+  voipProviderId: 'voipProviderId',
+  wifi: 'wifi'
+} as const
+
+export type Terminal_nodesScalarFieldEnum = (typeof Terminal_nodesScalarFieldEnum)[keyof typeof Terminal_nodesScalarFieldEnum]
+
+
+export const Daily_consumptionScalarFieldEnum = {
+  id: 'id',
+  fiberVuId: 'fiberVuId',
+  clientName: 'clientName',
+  consumptionDay: 'consumptionDay',
+  createdAt: 'createdAt',
+  down: 'down',
+  terminalNodeId: 'terminalNodeId',
+  up: 'up'
+} as const
+
+export type Daily_consumptionScalarFieldEnum = (typeof Daily_consumptionScalarFieldEnum)[keyof typeof Daily_consumptionScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1068,6 +1299,8 @@ export type GlobalOmitConfig = {
   roles?: Prisma.rolesOmit
   user_logs?: Prisma.user_logsOmit
   database_backup?: Prisma.database_backupOmit
+  terminal_nodes?: Prisma.terminal_nodesOmit
+  daily_consumption?: Prisma.daily_consumptionOmit
 }
 
 /* Types for Logging */

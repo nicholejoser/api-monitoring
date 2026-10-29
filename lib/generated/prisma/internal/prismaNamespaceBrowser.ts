@@ -54,7 +54,9 @@ export const ModelName = {
   users: 'users',
   roles: 'roles',
   user_logs: 'user_logs',
-  database_backup: 'database_backup'
+  database_backup: 'database_backup',
+  terminal_nodes: 'terminal_nodes',
+  daily_consumption: 'daily_consumption'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -123,6 +125,87 @@ export const Database_backupScalarFieldEnum = {
 } as const
 
 export type Database_backupScalarFieldEnum = (typeof Database_backupScalarFieldEnum)[keyof typeof Database_backupScalarFieldEnum]
+
+
+export const Terminal_nodesScalarFieldEnum = {
+  id: 'id',
+  fiberVuId: 'fiberVuId',
+  cityId: 'cityId',
+  cityName: 'cityName',
+  clientId: 'clientId',
+  clientIdentifier: 'clientIdentifier',
+  clientName: 'clientName',
+  clientOuterIdentifier: 'clientOuterIdentifier',
+  comment: 'comment',
+  contact: 'contact',
+  contract: 'contract',
+  createdAt: 'createdAt',
+  createdById: 'createdById',
+  createdByName: 'createdByName',
+  customVlanTaggingIptvId: 'customVlanTaggingIptvId',
+  customVlanTaggingNetId: 'customVlanTaggingNetId',
+  deletedAt: 'deletedAt',
+  deletedById: 'deletedById',
+  email: 'email',
+  fixIp: 'fixIp',
+  hookedAt: 'hookedAt',
+  hookedById: 'hookedById',
+  hookedByName: 'hookedByName',
+  isFtth: 'isFtth',
+  isPppoe: 'isPppoe',
+  isPppoeActive: 'isPppoeActive',
+  language: 'language',
+  mapDataId: 'mapDataId',
+  mapDataName: 'mapDataName',
+  modifiedAt: 'modifiedAt',
+  modifiedById: 'modifiedById',
+  modifiedByName: 'modifiedByName',
+  name: 'name',
+  number: 'number',
+  numberExt: 'numberExt',
+  oltName: 'oltName',
+  onuOltId: 'onuOltId',
+  opticalDeviceId: 'opticalDeviceId',
+  outerIdentity: 'outerIdentity',
+  packageName: 'packageName',
+  password: 'password',
+  phone: 'phone',
+  radiusPassword: 'radiusPassword',
+  radiusUsername: 'radiusUsername',
+  rfEnabled: 'rfEnabled',
+  serialNumber: 'serialNumber',
+  serviceAreaId: 'serviceAreaId',
+  serviceAreaName: 'serviceAreaName',
+  sipData: 'sipData',
+  status: 'status',
+  statusId: 'statusId',
+  statusOperational: 'statusOperational',
+  streetId: 'streetId',
+  streetName: 'streetName',
+  terminalNodeOltId: 'terminalNodeOltId',
+  todoCount: 'todoCount',
+  todoTaskIds: 'todoTaskIds',
+  tr069Enabled: 'tr069Enabled',
+  voipProvider: 'voipProvider',
+  voipProviderId: 'voipProviderId',
+  wifi: 'wifi'
+} as const
+
+export type Terminal_nodesScalarFieldEnum = (typeof Terminal_nodesScalarFieldEnum)[keyof typeof Terminal_nodesScalarFieldEnum]
+
+
+export const Daily_consumptionScalarFieldEnum = {
+  id: 'id',
+  fiberVuId: 'fiberVuId',
+  clientName: 'clientName',
+  consumptionDay: 'consumptionDay',
+  createdAt: 'createdAt',
+  down: 'down',
+  terminalNodeId: 'terminalNodeId',
+  up: 'up'
+} as const
+
+export type Daily_consumptionScalarFieldEnum = (typeof Daily_consumptionScalarFieldEnum)[keyof typeof Daily_consumptionScalarFieldEnum]
 
 
 export const SortOrder = {

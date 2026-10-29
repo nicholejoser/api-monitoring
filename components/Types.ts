@@ -89,6 +89,7 @@ export interface TerminalNode {
   hookedById: number;
   hookedByName: string;
   id: number;
+  fiberVuId: number;
   isFtth: boolean;
   isPppoe: boolean;
   isPppoeActive: boolean;
@@ -114,7 +115,7 @@ export interface TerminalNode {
   serialNumber: string;
   serviceAreaId: number | null;
   serviceAreaName: string | null;
-  sipData: unknown | null;
+  sipData: string | null;
   status: string;
   statusId: number;
   statusOperational: boolean;
@@ -122,7 +123,7 @@ export interface TerminalNode {
   streetName: string;
   terminalNodeOltId: string;
   todoCount: number | null;
-  todoTaskIds: unknown | null;
+  todoTaskIds: string | null;
   tr069Enabled: boolean;
   voipProvider: string;
   voipProviderId: string;

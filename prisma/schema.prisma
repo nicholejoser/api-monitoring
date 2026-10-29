@@ -67,3 +67,85 @@ model database_backup {
   @@index([createdAt])
   @@index([createdById])
 }
+
+model terminal_nodes {
+  id                       Int       @id @default(autoincrement())
+  fiberVuId                Int       @unique
+  cityId                   Int
+  cityName                 String
+  clientId                 Int
+  clientIdentifier         String
+  clientName               String
+  clientOuterIdentifier    String
+  comment                  String?
+  contact                  String
+  contract                 String
+  createdAt                DateTime
+  createdById              Int
+  createdByName            String
+  customVlanTaggingIptvId   Int?
+  customVlanTaggingNetId    Int?
+  deletedAt                DateTime?
+  deletedById              Int?
+  email                    String
+  fixIp                    String?
+  hookedAt                 DateTime
+  hookedById               Int
+  hookedByName             String
+  isFtth                   Boolean
+  isPppoe                  Boolean
+  isPppoeActive            Boolean
+  language                 String
+  mapDataId                Int
+  mapDataName              String
+  modifiedAt               DateTime
+  modifiedById             Int
+  modifiedByName           String
+  name                     String
+  number                   Int
+  numberExt                String
+  oltName                  String
+  onuOltId                 Int
+  opticalDeviceId          Int
+  outerIdentity            String?
+  packageName              String
+  password                 String
+  phone                    String
+  radiusPassword           String?
+  radiusUsername           String?
+  rfEnabled                Boolean
+  serialNumber             String
+  serviceAreaId            Int?
+  serviceAreaName          String?
+  sipData                  String?
+  status                   String
+  statusId                 Int
+  statusOperational        Boolean
+  streetId                 Int
+  streetName               String
+  terminalNodeOltId        String
+  todoCount                Int?
+  todoTaskIds              String?
+  tr069Enabled             Boolean
+  voipProvider             String
+  voipProviderId           String
+  wifi                     Boolean
+
+  dailyConsumptions daily_consumption[]
+}
+
+model daily_consumption {
+  id             Int           @id @default(autoincrement())
+  fiberVuId      Int           @unique
+  clientName     String
+  consumptionDay String
+  createdAt      DateTime
+  down           String
+  terminalNodeId Int
+  up             String
+
+  terminalNode   terminal_nodes @relation(fields: [terminalNodeId], references: [id])
+
+  @@index([terminalNodeId])
+  @@index([consumptionDay])
+}

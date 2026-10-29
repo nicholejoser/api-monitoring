@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "terminal_nodes" ALTER COLUMN "sipData" SET DATA TYPE TEXT,
+ALTER COLUMN "todoTaskIds" SET DATA TYPE TEXT;

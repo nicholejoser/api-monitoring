@@ -61,3 +61,13 @@ export type user_logs = Prisma.user_logsModel
  * 
  */
 export type database_backup = Prisma.database_backupModel
+/**
+ * Model terminal_nodes
+ * 
+ */
+export type terminal_nodes = Prisma.terminal_nodesModel
+/**
+ * Model daily_consumption
+ * 
+ */
+export type daily_consumption = Prisma.daily_consumptionModel
