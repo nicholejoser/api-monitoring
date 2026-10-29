@@ -1,22 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
-type Role = "Super Admin" | "Admin" | "User";
+type RoleId = 1 | 2 | 3;
 
 interface AuthTokenPayload {
-  role: Role;
+  id: number;
+  email: string | null;
+  role: RoleId;
 }
 
+const roleMap: Record<RoleId, string> = {
+  1: "superadmin",
+  2: "admin",
+  3: "user",
+};
+
 export function proxy(request: NextRequest) {
-  const token = request.cookies.get("WTBkR2VWbFhNVFk9")?.value;
+  const kill = process.env.KILL;
+  if (!kill) {
+    throw new Error("FiberVu authentication configuration is missing.");
+  }
+  const token = request.cookies.get(kill)?.value;
   const pathname = request.nextUrl.pathname;
 
-  // Allow login and users pages
   if (pathname === "/" || pathname === "/users") {
     return NextResponse.next();
   }
 
-  // Redirect unauthenticated users
   if (!token) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -27,9 +37,13 @@ export function proxy(request: NextRequest) {
       process.env.JWT_SECRET!,
     ) as AuthTokenPayload;
 
-    const role = decoded.role.toLowerCase().replace(/\s+/g, "");
+    const role = roleMap[decoded.role];
 
-    // Admin-only pages: Admin and Super Admin
+    if (!role) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+
+    // Super Admin and Admin only
     if (
       pathname.startsWith("/admin") &&
       !["admin", "superadmin"].includes(role)
@@ -37,7 +51,7 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Super Admin-only pages
+    // Super Admin only
     if (pathname.startsWith("/terminal-nodes") && role !== "superadmin") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
