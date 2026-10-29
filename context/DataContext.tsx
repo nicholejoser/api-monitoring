@@ -73,12 +73,12 @@ export function DataProvider({
     }
   };
 
-  useEffect(() => {
-    if (hasFetchedRef.current) return;
+  // useEffect(() => {
+  //   if (hasFetchedRef.current) return;
 
-    fetchData();
-    hasFetchedRef.current = true;
-  }, []);
+  //   fetchData();
+  //   hasFetchedRef.current = true;
+  // }, []);
 
   return (
     <DataContext.Provider
