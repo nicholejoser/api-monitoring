@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 
+type Role = "Super Admin" | "Admin" | "User";
+
+interface AuthTokenPayload {
+  role: Role;
+}
+
 export function proxy(request: NextRequest) {
   const token = request.cookies.get("WTBkR2VWbFhNVFk9")?.value;
-
   const pathname = request.nextUrl.pathname;
 
-  const isLoginPage =
-    pathname === "/" || pathname === "/users";
+  // Allow login and users pages
+  if (pathname === "/" || pathname === "/users") {
+    return NextResponse.next();
+  }
 
-  // ✅ Allow login page
-  if (isLoginPage) return NextResponse.next();
-
-  // ✅ No token → redirect
+  // Redirect unauthenticated users
   if (!token) {
     return NextResponse.redirect(new URL("/", request.url));
   }
@@ -20,19 +24,21 @@ export function proxy(request: NextRequest) {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET!
-    ) as { role: string };
+      process.env.JWT_SECRET!,
+    ) as AuthTokenPayload;
 
-    // ✅ Admin-only pages
-    if (pathname.startsWith("/admin") && decoded.role !== "admin") {
+    const role = decoded.role.toLowerCase().replace(/\s+/g, "");
+
+    // Admin-only pages: Admin and Super Admin
+    if (
+      pathname.startsWith("/admin") &&
+      !["admin", "superadmin"].includes(role)
+    ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // ✅ Example: Only admin + manager
-    if (
-      pathname.startsWith("/terminal-nodes") &&
-      !["superadmin"].includes(decoded.role)
-    ) {
+    // Super Admin-only pages
+    if (pathname.startsWith("/terminal-nodes") && role !== "superadmin") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
