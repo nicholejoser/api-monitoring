@@ -38,7 +38,6 @@ export function signToken(
   return jwt.sign(payload, getJwtSecret(), options);
 }
 
-
 /**
  * Verify Token
  */
@@ -51,7 +50,11 @@ export function verifyToken(token: string): AuthTokenPayload | null {
 }
 
 export async function getCurrentUser() {
-  const token = (await cookies()).get("WVRKc2MySkJQVDA9")?.value;
+  const kill = process.env.KILL;
+  if (!kill) {
+    throw new Error("Kill is missing to verify current user.");
+  }
+  const token = (await cookies()).get(kill)?.value;
 
   if (!token) {
     return null;

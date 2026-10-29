@@ -23,9 +23,6 @@ export default async function DashboardLayout({
     redirect("/");
   }
 
-  if (!token) {
-    redirect("/");
-  }
   let currentUser = null;
   try {
     currentUser = await getCurrentUser();
