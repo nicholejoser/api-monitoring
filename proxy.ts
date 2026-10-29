@@ -22,7 +22,9 @@ export function proxy(request: NextRequest) {
   }
   const token = request.cookies.get(kill)?.value;
   const pathname = request.nextUrl.pathname;
-
+  console.log("Path:", pathname);
+  console.log("Cookie name configured:", kill);
+  console.log("Cookie exists:", Boolean(token));
   if (pathname === "/" || pathname === "/users") {
     return NextResponse.next();
   }
@@ -38,7 +40,8 @@ export function proxy(request: NextRequest) {
     ) as AuthTokenPayload;
 
     const role = roleMap[decoded.role];
-    console.log(role);
+    console.log("Role ID:", decoded.role);
+    console.log("Mapped role:", role);
     if (!role) {
       return NextResponse.redirect(new URL("/", request.url));
     }
