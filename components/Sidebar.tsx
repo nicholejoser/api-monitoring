@@ -28,12 +28,12 @@ export const menuItems = [
     name: "Dashboard",
     icon: LayoutDashboard,
     href: "/dashboard",
-    roles: ["admin", "superadmin"],
+    roles: ["admin", "super admin"],
   },
   {
     name: "Terminal Nodes",
     icon: Server,
-    roles: ["superadmin"],
+    roles: ["super admin"],
     // No href here since it's a parent category container for sub-menus
     subMenu: [
       {
