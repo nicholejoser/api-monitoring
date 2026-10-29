@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 export default function TerminalNodesAll() {
-  const { terminalNodeData, consumptionGroupData, isLoading, fvKill } =
+  const { terminalNodeData, consumptionGroupData, isLoading, fiberKill } =
     useData();
 
   const [startDate, setStartDate] = useState<Date | undefined>(
@@ -78,12 +78,12 @@ export default function TerminalNodesAll() {
             />
             <button
               onClick={() => router.push("/terminal-nodes/settings")}
-              disabled={!fvKill}
+              disabled={!fiberKill}
               className={`
           px-5 py-3 rounded-md text-sm font-medium transition-all
           flex items-center gap-2
           ${
-            fvKill
+            fiberKill
               ? "bg-slate-600 text-white hover:bg-slate-700 shadow-sm cursor-pointer"
               : "bg-gray-200 text-gray-500 cursor-not-allowed"
           }

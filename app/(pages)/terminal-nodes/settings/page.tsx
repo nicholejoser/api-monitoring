@@ -37,7 +37,7 @@ import {
 import UploadJson from "@/components/UploadJson";
 
 export default function TerminalNodeSettings() {
-  const { fvKill } = useData();
+  const { fiberKill } = useData();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [terminalNodeData, setTerminalNodeData] = useState<TerminalNode[]>([]);
   const [consumptionGroupData, setConsumptionGroupData] = useState<
@@ -56,7 +56,7 @@ export default function TerminalNodeSettings() {
 
   const handleTerminalNode = async () => {
     setIsLoading(true);
-    fetch(`/api/terminalnodes?token=${fvKill}`, {
+    fetch(`/api/terminalnodes?token=${fiberKill}`, {
       method: "GET",
     });
 
@@ -77,7 +77,7 @@ export default function TerminalNodeSettings() {
     setIsLoading(true);
     try {
       fetch(
-        `/api/consumption?token=${fvKill}&type=multiple&date=${selected}&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
+        `/api/consumption?token=${fiberKill}&type=multiple&date=${selected}&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
       );
       const interval = setInterval(async () => {
         const res = await fetch("/api/progress");
@@ -149,7 +149,7 @@ export default function TerminalNodeSettings() {
         setStartDate(getStartOfMonth(date));
         setEndDate(getEndOfMonth(date));
         const res = await fetch(
-          `/api/terminalnodes?token=${fvKill}&type=exist&date=${selected}`,
+          `/api/terminalnodes?token=${fiberKill}&type=exist&date=${selected}`,
           { method: "GET" },
         );
         if (!res.ok) {
@@ -172,7 +172,7 @@ export default function TerminalNodeSettings() {
 
     fetchSelectedData();
   }, [
-    fvKill,
+    fiberKill,
     selected,
     setConsumptionGroupData,
     setEndDate,
@@ -268,8 +268,8 @@ export default function TerminalNodeSettings() {
               </button>
               <button
                 onClick={handleTerminalNode}
-                disabled={!fvKill}
-                className={`px-3 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-lg shadow-black/10 active:scale-[0.97] flex items-center gap-2 ${fvKill ? "bg-slate-600 text-white border border-transparent hover:text-slate-600 hover:border-slate-600 hover:bg-white cursor-pointer" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+                disabled={!fiberKill}
+                className={`px-3 py-2.5 rounded-lg font-semibold text-sm transition-all shadow-lg shadow-black/10 active:scale-[0.97] flex items-center gap-2 ${fiberKill ? "bg-slate-600 text-white border border-transparent hover:text-slate-600 hover:border-slate-600 hover:bg-white cursor-pointer" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
               >
                 <RefreshCcw className="w-5 h-5 shrink-0 active:animate-spin" />
                 Fetch Terminal Nodes
@@ -299,7 +299,7 @@ export default function TerminalNodeSettings() {
             </div>
 
             <button
-              disabled={isLoading || !fvKill}
+              disabled={isLoading || !fiberKill}
               onClick={handleConsMultiple}
               className={`
           min-w-45 px-6 py-2 rounded-lg text-sm font-medium
@@ -307,7 +307,7 @@ export default function TerminalNodeSettings() {
           ${
             isLoading
               ? "bg-slate-400 text-white"
-              : fvKill
+              : fiberKill
                 ? "bg-slate-600 text-white hover:bg-slate-700"
                 : "bg-gray-200 text-gray-500 cursor-not-allowed"
           }

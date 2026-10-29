@@ -15,7 +15,7 @@ import BandwidthChart from "@/components/BandwidthChart";
 import { useData } from "@/context/DataContext";
 
 export default function TerminalNodesSearch() {
-  const { fvKill } = useData();
+  const { fiberKill } = useData();
   const [usage, setUsage] = useState<ConsumptionLog>({
     cityId: "",
     cityName: "",
@@ -52,7 +52,7 @@ export default function TerminalNodesSearch() {
     try {
       // 3. CRITICAL FIX: We must use the proxy here to avoid the CORS error!
       // Your proxy route will handle hitting the 110.93.79.226 IP securely.
-      const res = await fetch(`/api/proxy?id=${id}&token=${fvKill}`);
+      const res = await fetch(`/api/proxy?id=${id}&token=${fiberKill}`);
 
       if (!res.ok) {
         throw new Error(`Error: ${res.status}`);
@@ -138,7 +138,7 @@ export default function TerminalNodesSearch() {
   const handleBandwidth = async () => {
     try {
       const res = await fetch(
-        `/api/bandwidth?id=${nodeInput.trim()}&token=${fvKill}`,
+        `/api/bandwidth?id=${nodeInput.trim()}&token=${fiberKill}`,
       );
 
       const data = await res.json();
@@ -150,7 +150,7 @@ export default function TerminalNodesSearch() {
   const handleConsumption = async () => {
     try {
       const res = await fetch(
-        `/api/consumption?id=${nodeInput.trim()}&token=${fvKill}&type=single&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
+        `/api/consumption?id=${nodeInput.trim()}&token=${fiberKill}&type=single&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
       );
 
       const data = await res.json();
@@ -234,8 +234,8 @@ export default function TerminalNodesSearch() {
                   </div>
                   <button
                     type="submit"
-                    disabled={!fvKill}
-                    className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-black/10 active:scale-[0.97] flex items-center gap-2 ${fvKill ? "bg-white hover:bg-gray-50 text-slate-700 cursor-pointer" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+                    disabled={!fiberKill}
+                    className={`px-6 py-2.5 rounded-xl font-semibold text-sm transition-all shadow-lg shadow-black/10 active:scale-[0.97] flex items-center gap-2 ${fiberKill ? "bg-white hover:bg-gray-50 text-slate-700 cursor-pointer" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
                   >
                     <svg
                       className="w-4 h-4"
