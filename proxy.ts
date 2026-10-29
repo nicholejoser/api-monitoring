@@ -16,37 +16,51 @@ const roleMap: Record<RoleId, string> = {
 };
 
 export function proxy(request: NextRequest) {
-  const kill = process.env.KILL;
-  if (!kill) {
-    throw new Error("FiberVu authentication configuration is missing.");
-  }
-  const token = request.cookies.get(kill)?.value;
   const pathname = request.nextUrl.pathname;
-  console.log("Path:", pathname);
-  console.log("Cookie name configured:", kill);
-  console.log("Cookie exists:", Boolean(token));
+
+  // Allow the login page.
   if (pathname === "/" || pathname === "/users") {
     return NextResponse.next();
   }
 
+  const cookieName = process.env.KILL;
+  const jwtSecret = process.env.JWT_SECRET;
+
+  if (!cookieName || !jwtSecret) {
+    console.error("Proxy configuration missing:", {
+      cookieNameConfigured: Boolean(cookieName),
+      jwtSecretConfigured: Boolean(jwtSecret),
+    });
+
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  const token = request.cookies.get(cookieName)?.value;
+
+  console.log("Proxy authentication:", {
+    pathname,
+    cookieExists: Boolean(token),
+  });
+
   if (!token) {
+    console.log("No authentication cookie; redirecting to login.");
     return NextResponse.redirect(new URL("/", request.url));
   }
 
   try {
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET!,
-    ) as AuthTokenPayload;
-
+    const decoded = jwt.verify(token, jwtSecret) as AuthTokenPayload;
     const role = roleMap[decoded.role];
-    console.log("Role ID:", decoded.role);
-    console.log("Mapped role:", role);
+
+    console.log("JWT verified:", {
+      userId: decoded.id,
+      roleId: decoded.role,
+      mappedRole: role,
+    });
+
     if (!role) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    // Super Admin and Admin only
     if (
       pathname.startsWith("/admin") &&
       !["admin", "super admin"].includes(role)
@@ -54,13 +68,20 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    // Super Admin only
-    if (pathname.startsWith("/terminal-nodes") && role !== "super admin") {
+    if (
+      pathname.startsWith("/terminal-nodes") &&
+      role !== "super admin"
+    ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
     return NextResponse.next();
-  } catch {
+  } catch (error) {
+    console.error(
+      "JWT verification failed:",
+      error instanceof Error ? error.message : "Unknown error",
+    );
+
     return NextResponse.redirect(new URL("/", request.url));
   }
 }
