@@ -4,11 +4,11 @@ module.exports = {
       name: "dcs",
       cwd: "/var/www/api-monitoring",
       script: "npm",
-      args: "start",
+      args: "start -- -H 127.0.0.1 -p 3000",
 
       env: {
         NODE_ENV: "production",
-        PORT: 3000,
+        NODE_TLS_REJECT_UNAUTHORIZED: "0",
       },
 
       autorestart: true,

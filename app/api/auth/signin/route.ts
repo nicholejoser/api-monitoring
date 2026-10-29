@@ -28,11 +28,10 @@ async function fiberVuLogin() {
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(15000),
   });
 
   const data = await res.json();
-
+  console.log("FIBERVU", data);
   if (!res.ok) {
     throw new Error(`FiberVu authentication failed: ${res.status}`);
   }
@@ -93,7 +92,7 @@ export async function POST(req: NextRequest) {
 
     // FiberVu authentication
     const fiberVuData = await fiberVuLogin();
-
+    console.log("FIBERVU DATA", fiberVuData);
     // JWT expiration based on role
     const maxAgeByRole: Record<string, number> = {
       "Super Admin": 60 * 60 * 24,
