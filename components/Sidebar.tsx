@@ -72,7 +72,7 @@ export default function Sidebar() {
     const toastId = toast.loading("Logging out...");
 
     try {
-      await fetch("/api/logout", {
+      await fetch("/api/auth/signout", {
         method: "POST",
       });
 
