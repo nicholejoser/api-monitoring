@@ -15,11 +15,12 @@ export default async function DashboardLayout({
   const kill = process.env.KILL;
   const fibeKill = process.env.FIBERKILL;
   if (!kill || !fibeKill) {
-    throw new Error("FiberVu authentication configuration is missing.");
+    console.log("FiberVu authentication configuration is missing.");
+    redirect("/");
   }
   const token = cookieStore.get(kill)?.value;
 
-  console.log("This is the token from layout", token)
+  console.log("This is the token from layout", token);
   if (!token) {
     redirect("/");
   }
