@@ -10,7 +10,7 @@ interface AuthTokenPayload {
 }
 
 const roleMap: Record<RoleId, string> = {
-  1: "superadmin",
+  1: "super admin",
   2: "admin",
   3: "user",
 };
@@ -38,7 +38,7 @@ export function proxy(request: NextRequest) {
     ) as AuthTokenPayload;
 
     const role = roleMap[decoded.role];
-
+    console.log(role);
     if (!role) {
       return NextResponse.redirect(new URL("/", request.url));
     }
@@ -46,13 +46,13 @@ export function proxy(request: NextRequest) {
     // Super Admin and Admin only
     if (
       pathname.startsWith("/admin") &&
-      !["admin", "superadmin"].includes(role)
+      !["admin", "super admin"].includes(role)
     ) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
     // Super Admin only
-    if (pathname.startsWith("/terminal-nodes") && role !== "superadmin") {
+    if (pathname.startsWith("/terminal-nodes") && role !== "super admin") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 

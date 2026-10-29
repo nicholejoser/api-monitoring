@@ -35,6 +35,7 @@ export default function Login() {
         setLoading(false);
         return;
       }
+      console.log(data)
       toast.dismiss(toastID);
       router.replace("/dashboard");
     } catch {
