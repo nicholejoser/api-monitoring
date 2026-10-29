@@ -19,6 +19,7 @@ export default async function DashboardLayout({
   }
   const token = cookieStore.get(kill)?.value;
 
+  console.log("This is the token from layout", token)
   if (!token) {
     redirect("/");
   }
