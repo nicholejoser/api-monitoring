@@ -20,33 +20,30 @@ interface DataContextType {
   isLoading: boolean;
   refreshData: () => Promise<void>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  fvKill: string;
-  setFVKill: React.Dispatch<React.SetStateAction<string>>;
   setTerminalNodeData: React.Dispatch<React.SetStateAction<TerminalNode[]>>;
   setConsumptionGroupData: React.Dispatch<
     React.SetStateAction<ConsumptionGroupedByClient[]>
   >;
   currentUser: UserTypes;
-  fiberData: any;
+  fiberKill: string;
 }
 interface DataProviderProps {
   children: React.ReactNode;
   currentUser: UserTypes;
-  fiberData: any;
+  fiberKill: string;
 }
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export function DataProvider({
   children,
   currentUser,
-  fiberData,
+  fiberKill,
 }: DataProviderProps) {
   const [terminalNodeData, setTerminalNodeData] = useState<TerminalNode[]>([]);
   const [consumptionGroupData, setConsumptionGroupData] = useState<
     ConsumptionGroupedByClient[]
   >([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [fvKill, setFVKill] = useState<string>("");
   const hasFetchedRef = useRef<boolean>(false);
 
   const fetchData = async () => {
@@ -89,12 +86,10 @@ export function DataProvider({
         terminalNodeData,
         consumptionGroupData,
         currentUser,
-        fiberData,
+        fiberKill,
         isLoading,
         setIsLoading,
         refreshData: fetchData,
-        fvKill,
-        setFVKill,
         setTerminalNodeData,
         setConsumptionGroupData,
       }}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -55,18 +55,15 @@ export const menuItems = [
   },
 ];
 
-interface SidebarProps {
-  fiberKill: string;
-}
-export default function Sidebar({ fiberKill }: SidebarProps) {
-  const { setFVKill,currentUser } = useData();
+export default function Sidebar() {
+  const { currentUser } = useData();
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
   // Find active parent menu name based on current sub-menu path
   const activeParent = menuItems.find((item) =>
-    item.subMenu?.some((sub) => pathname.startsWith(sub.href))
+    item.subMenu?.some((sub) => pathname.startsWith(sub.href)),
   )?.name;
 
   const [openItem, setOpenItem] = useState<string | undefined>(activeParent);
@@ -90,12 +87,6 @@ export default function Sidebar({ fiberKill }: SidebarProps) {
       });
     }
   };
-
-  useEffect(() => {
-    if (fiberKill) {
-      setFVKill(fiberKill);
-    }
-  }, [fiberKill, setFVKill]);
 
   const filteredMenu = menuItems.filter(
     (item) =>

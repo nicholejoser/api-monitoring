@@ -12,8 +12,12 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const cookieStore = await cookies();
-
-  const token = cookieStore.get("WTBkR2VWbFhNVFk9")?.value;
+  const kill = process.env.KILL;
+  const fibeKill = process.env.FIBERKILL;
+  if (!kill || !fibeKill) {
+    throw new Error("FiberVu authentication configuration is missing.");
+  }
+  const token = cookieStore.get(kill)?.value;
 
   if (!token) {
     redirect("/");
@@ -33,11 +37,11 @@ export default async function DashboardLayout({
     console.error("Invalid token:", error);
     redirect("/");
   }
-  const fiberKill = cookieStore.get("fiberVuToken")?.value ?? "";
+  const fiberKill = cookieStore.get(fibeKill)?.value ?? "";
   return (
-    <DataProvider currentUser={currentUser} fiberData={fiberKill}>
+    <DataProvider currentUser={currentUser} fiberKill={fiberKill}>
       <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">
-        <Sidebar fiberKill={fiberKill} />
+        <Sidebar />
         <div className="flex flex-col flex-1">
           <Header />
 

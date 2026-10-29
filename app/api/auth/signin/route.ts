@@ -127,6 +127,7 @@ export async function POST(req: NextRequest) {
 
     // Authentication cookie
     const cookieName = tripleEncode("kill");
+    const cookieName2 = tripleEncode("fiberKill");
 
     response.cookies.set(cookieName, token, {
       httpOnly: true,
@@ -136,7 +137,13 @@ export async function POST(req: NextRequest) {
       path: "/",
       maxAge,
     });
-
+    response.cookies.set(cookieName2, fiberVuData.token.id, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "lax",
+      path: "/",
+      maxAge,
+    });
     // User activity log
     const { ipAddress, userAgent } = getRequestInfo(req);
 
