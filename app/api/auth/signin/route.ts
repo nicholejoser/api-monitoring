@@ -119,6 +119,7 @@ export async function POST(req: NextRequest) {
         email: user.email,
         role: user.roles.role,
       },
+      fiberVuData,
     });
 
     // Authentication cookie
