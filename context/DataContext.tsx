@@ -18,7 +18,7 @@ interface DataContextType {
   terminalNodeData: TerminalNode[];
   consumptionGroupData: ConsumptionGroupedByClient[];
   isLoading: boolean;
-  refreshData: () => Promise<void>;
+  // refreshData: () => Promise<void>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setTerminalNodeData: React.Dispatch<React.SetStateAction<TerminalNode[]>>;
   setConsumptionGroupData: React.Dispatch<
@@ -46,32 +46,32 @@ export function DataProvider({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const hasFetchedRef = useRef<boolean>(false);
 
-  const fetchData = async () => {
-    try {
-      setIsLoading(true);
+  // const fetchData = async () => {
+  //   try {
+  //     setIsLoading(true);
 
-      const [res1, res2] = await Promise.all([
-        // fetch("/data/terminal_nodes.json"),
-        // fetch("/data/consumption_data.json"),
-        fetch("/data/2026-07-01/filtered_terminal_nodes.json"),
-        fetch("/data/2026-07-01/consumption_data.json"),
-        // fetch("/api/import?type=terminal_nodes", { method: "GET" }),
-        // fetch("/api/import?type=consumptions", { method: "GET" }),
-      ]);
+  //     const [res1, res2] = await Promise.all([
+  //       // fetch("/data/terminal_nodes.json"),
+  //       // fetch("/data/consumption_data.json"),
+  //       fetch("/data/2026-07-01/filtered_terminal_nodes.json"),
+  //       fetch("/data/2026-07-01/consumption_data.json"),
+  //       // fetch("/api/import?type=terminal_nodes", { method: "GET" }),
+  //       // fetch("/api/import?type=consumptions", { method: "GET" }),
+  //     ]);
 
-      const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
+  //     const [data1, data2] = await Promise.all([res1.json(), res2.json()]);
 
-      setTerminalNodeData(data1);
-      setConsumptionGroupData(data2);
+  //     setTerminalNodeData(data1);
+  //     setConsumptionGroupData(data2);
 
-      toast.success("Data loaded successfully!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  //     toast.success("Data loaded successfully!");
+  //   } catch (err) {
+  //     console.error(err);
+  //     toast.error("Failed to load data");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
 
   // useEffect(() => {
   //   if (hasFetchedRef.current) return;
@@ -89,7 +89,7 @@ export function DataProvider({
         fiberKill,
         isLoading,
         setIsLoading,
-        refreshData: fetchData,
+        // refreshData: fetchData,
         setTerminalNodeData,
         setConsumptionGroupData,
       }}
