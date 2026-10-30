@@ -29,16 +29,15 @@ export default async function DashboardLayout({
   }
 
   let currentUser = null;
-  try {
-    currentUser = await getCurrentUser();
+ try {
+  currentUser = await getCurrentUser();
+} catch (error) {
+  console.error("Invalid token:", error);
+}
 
-    if (!currentUser) {
-      redirect("/");
-    }
-  } catch (error) {
-    console.error("Invalid token:", error);
-    redirect("/");
-  }
+if (!currentUser) {
+  redirect("/");
+}
   const fiberKill = cookieStore.get(encodedFiberKill)?.value ?? "";
   return (
     <DataProvider currentUser={currentUser} fiberKill={fiberKill}>
