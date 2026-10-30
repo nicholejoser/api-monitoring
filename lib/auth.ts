@@ -2,6 +2,7 @@ import jwt, { JwtPayload, SignOptions } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { prisma } from "./prisma";
+import { tripleEncode } from "./utils";
 /**
  * Strongly typed JWT payload
  */
@@ -50,11 +51,13 @@ export function verifyToken(token: string): AuthTokenPayload | null {
 }
 
 export async function getCurrentUser() {
-  const kill = process.env.KILL;
-  if (!kill) {
+  const raw = process.env.KILL;
+  if (!raw) {
     throw new Error("Kill is missing to verify current user.");
   }
-  const token = (await cookies()).get(kill)?.value;
+  const encodedKill = tripleEncode(raw);
+
+  const token = (await cookies()).get(encodedKill)?.value;
 
   if (!token) {
     return null;

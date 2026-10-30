@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import { tripleEncode } from "./lib/utils";
 
 type RoleId = 1 | 2 | 3;
 
@@ -23,17 +24,18 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const cookieName = process.env.KILL;
+  const raw = process.env.KILL;
   const jwtSecret = process.env.JWT_SECRET;
-
-  if (!cookieName || !jwtSecret) {
+  
+  if (!raw || !jwtSecret) {
     console.error("Proxy configuration missing:", {
-      cookieNameConfigured: Boolean(cookieName),
+      cookieNameConfigured: Boolean(raw),
       jwtSecretConfigured: Boolean(jwtSecret),
     });
-
+    
     return NextResponse.redirect(new URL("/", request.url));
   }
+  const cookieName = tripleEncode(raw);
 
   const token = request.cookies.get(cookieName)?.value;
 
@@ -68,10 +70,7 @@ export function proxy(request: NextRequest) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 
-    if (
-      pathname.startsWith("/terminal-nodes") &&
-      role !== "super admin"
-    ) {
+    if (pathname.startsWith("/terminal-nodes") && role !== "super admin") {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
 

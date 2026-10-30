@@ -5,6 +5,7 @@ import { DataProvider } from "@/context/DataContext";
 import { redirect } from "next/navigation";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { getCurrentUser } from "@/lib/auth";
+import { tripleEncode } from "@/lib/utils";
 
 export default async function DashboardLayout({
   children,
@@ -18,7 +19,9 @@ export default async function DashboardLayout({
     console.log("FiberVu authentication configuration is missing.");
     redirect("/");
   }
-  const token = cookieStore.get(kill)?.value;
+  const encodedKill = tripleEncode(kill);
+  const encodedFiberKill = tripleEncode(fibeKill);
+  const token = cookieStore.get(encodedKill)?.value;
 
   console.log("This is the token from layout", token);
   if (!token) {
@@ -36,7 +39,7 @@ export default async function DashboardLayout({
     console.error("Invalid token:", error);
     redirect("/");
   }
-  const fiberKill = cookieStore.get(fibeKill)?.value ?? "";
+  const fiberKill = cookieStore.get(encodedFiberKill)?.value ?? "";
   return (
     <DataProvider currentUser={currentUser} fiberKill={fiberKill}>
       <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">
