@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getRequestInfo } from "../../users/route";
 import { createUserLog } from "@/lib/logs";
 import { signToken } from "@/lib/auth";
-process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+// process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 // FiberVu authentication
 async function fiberVuLogin() {
