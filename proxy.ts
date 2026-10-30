@@ -26,16 +26,17 @@ export function proxy(request: NextRequest) {
 
   const raw = process.env.KILL;
   const jwtSecret = process.env.JWT_SECRET;
-  
   if (!raw || !jwtSecret) {
     console.error("Proxy configuration missing:", {
       cookieNameConfigured: Boolean(raw),
       jwtSecretConfigured: Boolean(jwtSecret),
     });
-    
+
     return NextResponse.redirect(new URL("/", request.url));
   }
   const cookieName = tripleEncode(raw);
+  console.log("Raw",raw);
+  console.log("Cookie name",cookieName);
 
   const token = request.cookies.get(cookieName)?.value;
 
