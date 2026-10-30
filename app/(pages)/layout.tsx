@@ -39,6 +39,7 @@ if (!currentUser) {
   redirect("/");
 }
   const fiberKill = cookieStore.get(encodedFiberKill)?.value ?? "";
+  console.log(fiberKill)
   return (
     <DataProvider currentUser={currentUser} fiberKill={fiberKill}>
       <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">
