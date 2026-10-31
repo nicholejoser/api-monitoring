@@ -1,12 +1,11 @@
 "use client";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import TerminalTable from "./TerminalTable";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BarChart3, Download, Upload } from "lucide-react";
 import { AnalyticsProps } from "../Types";
 import { formatBytes } from "@/lib/utils";
 import TerminalNodesList from "../TerminalNodesList";
-import { toast } from "sonner";
 import TerminalPercentileTable from "./TerminalPercentileTable";
 import { useDataStore } from "@/store/data-store";
 
@@ -23,45 +22,25 @@ export default function TerminalTableDashboard({
   endDate: Date | undefined;
   setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
 }) {
-  const terminalNodeData = useDataStore((state) => state.terminalNodeData);
-
-  const consumptionGroupData = useDataStore(
-    (state) => state.consumptionGroupData,
-  );
+  const { fetchSyncs, syncs, consumptions, terminalNodes } = useDataStore();
 
   const [tabType, setTabType] = useState<string>("all");
-  const [files, setFiles] = useState<string[]>([]);
-  const [selected, setSelected] = useState<string>("");
+  const [selected, setSelected] = useState<number | null>(null);
   const selectedDate = useMemo(() => {
-    if (!consumptionGroupData.length) return null;
+    if (!consumptions.length) return null;
 
-    const firstClient = consumptionGroupData[0];
+    const firstClient = consumptions[0];
     if (!firstClient?.data?.length) return null;
     return firstClient.data[0].consumptionDay; // "2026-04-02"
-  }, [consumptionGroupData]);
+  }, [consumptions]);
+  const hasFetchedRef = useRef<boolean>(false);
 
   useEffect(() => {
-    let isMounted = true;
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    fetchSyncs();
+  }, [fetchSyncs]);
 
-    const loadFiles = async () => {
-      try {
-        const res = await fetch("/api/data-files");
-        const data = await res.json();
-
-        if (isMounted) {
-          setFiles(data);
-        }
-      } catch {
-        toast.error("Failed loading data options");
-      }
-    };
-
-    loadFiles();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
       {/* Header */}
@@ -82,7 +61,7 @@ export default function TerminalTableDashboard({
         >
           <div className="flex flex-row items-center gap-3">
             <TerminalNodesList
-              files={files}
+              syncs={syncs}
               selected={selected}
               setSelected={setSelected}
               setStartDate={setStartDate}
@@ -138,7 +117,7 @@ export default function TerminalTableDashboard({
           <TabsContent value="Top 1k Upload">
             <TerminalTable
               terminalNodedata={analytics.topUpload}
-              consumptionData={consumptionGroupData}
+              consumptionData={consumptions}
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}
@@ -149,7 +128,7 @@ export default function TerminalTableDashboard({
           <TabsContent value="Top 1k Download">
             <TerminalTable
               terminalNodedata={analytics.topDownload}
-              consumptionData={consumptionGroupData}
+              consumptionData={consumptions}
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}
@@ -194,8 +173,8 @@ export default function TerminalTableDashboard({
           </TabsContent>
           <TabsContent value="all">
             <TerminalPercentileTable
-              terminalNodedata={terminalNodeData}
-              consumptionData={consumptionGroupData}
+              terminalNodedata={terminalNodes}
+              consumptionData={consumptions}
               selectedDate={selectedDate}
               startDate={startDate}
               endDate={endDate}
@@ -207,7 +186,7 @@ export default function TerminalTableDashboard({
           <TabsContent value="0B Upload">
             <TerminalTable
               terminalNodedata={analytics.zeroBytesUpload}
-              consumptionData={consumptionGroupData}
+              consumptionData={consumptions}
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}
@@ -218,7 +197,7 @@ export default function TerminalTableDashboard({
           <TabsContent value="0B Download">
             <TerminalTable
               terminalNodedata={analytics.zeroBytesDownload}
-              consumptionData={consumptionGroupData}
+              consumptionData={consumptions}
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}

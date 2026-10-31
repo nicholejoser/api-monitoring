@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import {
   getEndOfLastMonth,
   getStartOfLastMonth,
@@ -10,11 +10,17 @@ import {
 import { DailyConsumption } from "../../../components/Types";
 import Loading from "@/components/Loading";
 import MetricsCard from "@/components/MetricsCard";
-import { useData } from "@/context/DataContext";
 import UsageChart from "@/components/UsageCharts";
 import TerminalTableDashboard from "@/components/tables/TerminalTableDashboard";
+import { useDataStore } from "@/store/data-store";
 export default function Dashboard() {
-  const { terminalNodeData, consumptionGroupData, isLoading } = useData();
+  const {
+    fetchSyncs,
+    consumptions,
+    terminalNodes,
+    isLoading,
+  } = useDataStore();
+  const hasFetchedRef = useRef<boolean>(false);
 
   const [startDate, setStartDate] = useState<Date | undefined>(
     getStartOfLastMonth(),
@@ -25,9 +31,9 @@ export default function Dashboard() {
     return isNaN(num) ? 0 : num;
   };
   const topClient = useMemo(() => {
-    if (!consumptionGroupData.length) return null;
+    if (!consumptions.length) return null;
 
-    return [...consumptionGroupData]
+    return [...consumptions]
       .map((client) => {
         const totalUpload = client.data.reduce(
           (sum, day) => sum + safeNumber(day.up),
@@ -47,21 +53,21 @@ export default function Dashboard() {
         };
       })
       .sort((a, b) => b.totalUsage - a.totalUsage)[0];
-  }, [consumptionGroupData]);
+  }, [consumptions]);
 
   const consumptionMap = useMemo(() => {
     const map: Record<number, DailyConsumption[]> = {};
 
-    consumptionGroupData.forEach((item) => {
+    consumptions.forEach((item) => {
       map[Number(item.clientId)] = item.data;
     });
 
     return map;
-  }, [consumptionGroupData]);
+  }, [consumptions]);
   // 🔍 Filtered data
 
   const enrichedData = useMemo(() => {
-    return terminalNodeData.map((item) => {
+    return terminalNodes.map((item) => {
       const clientConsumption = consumptionMap[item.clientId] || [];
 
       const filteredConsumption = clientConsumption.filter((row) =>
@@ -87,7 +93,7 @@ export default function Dashboard() {
         download95,
       };
     });
-  }, [terminalNodeData, consumptionMap, startDate, endDate]);
+  }, [terminalNodes, consumptionMap, startDate, endDate]);
 
   const analytics = useMemo(() => {
     if (!enrichedData.length) {
@@ -130,15 +136,19 @@ export default function Dashboard() {
       zeroBytesDownload,
     };
   }, [enrichedData]);
-
+  useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    fetchSyncs();
+  }, [fetchSyncs]);
   return (
     <div className="flex flex-col gap-10 font-lexend text-sm">
       {isLoading && <Loading />}
 
       <div>
         <MetricsCard
-          terminalNodeNum={terminalNodeData.length}
-          consumptionNum={consumptionGroupData.length}
+          terminalNodeNum={terminalNodes.length}
+          consumptionNum={consumptions.length}
           data={topClient?.data ?? []}
           analytics={analytics}
         />
@@ -148,7 +158,7 @@ export default function Dashboard() {
         <div className="py-6">
           <UsageChart
             data={topClient?.data ?? []}
-            terminalNodeData={terminalNodeData}
+            terminalNodes={terminalNodes}
             title="Top Client Bandwidth Usage"
           />
         </div>

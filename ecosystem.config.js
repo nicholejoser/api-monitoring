@@ -7,7 +7,7 @@ module.exports = {
       args: "start -- -H 127.0.0.1 -p 3000",
 
       env: {
-        NODE_ENV: "development",
+        NODE_ENV: "production",
       },
 
       autorestart: true,

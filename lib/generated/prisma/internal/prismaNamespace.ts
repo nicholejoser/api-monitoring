@@ -401,6 +401,7 @@ export const ModelName = {
   roles: 'roles',
   user_logs: 'user_logs',
   database_backup: 'database_backup',
+  terminal_node_syncs: 'terminal_node_syncs',
   terminal_nodes: 'terminal_nodes',
   daily_consumption: 'daily_consumption'
 } as const
@@ -418,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "users" | "roles" | "user_logs" | "database_backup" | "terminal_nodes" | "daily_consumption"
+    modelProps: "users" | "roles" | "user_logs" | "database_backup" | "terminal_node_syncs" | "terminal_nodes" | "daily_consumption"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -718,6 +719,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    terminal_node_syncs: {
+      payload: Prisma.$terminal_node_syncsPayload<ExtArgs>
+      fields: Prisma.terminal_node_syncsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.terminal_node_syncsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.terminal_node_syncsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>
+        }
+        findFirst: {
+          args: Prisma.terminal_node_syncsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.terminal_node_syncsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>
+        }
+        findMany: {
+          args: Prisma.terminal_node_syncsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>[]
+        }
+        create: {
+          args: Prisma.terminal_node_syncsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>
+        }
+        createMany: {
+          args: Prisma.terminal_node_syncsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.terminal_node_syncsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>[]
+        }
+        delete: {
+          args: Prisma.terminal_node_syncsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>
+        }
+        update: {
+          args: Prisma.terminal_node_syncsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>
+        }
+        deleteMany: {
+          args: Prisma.terminal_node_syncsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.terminal_node_syncsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.terminal_node_syncsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>[]
+        }
+        upsert: {
+          args: Prisma.terminal_node_syncsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$terminal_node_syncsPayload>
+        }
+        aggregate: {
+          args: Prisma.Terminal_node_syncsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTerminal_node_syncs>
+        }
+        groupBy: {
+          args: Prisma.terminal_node_syncsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Terminal_node_syncsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.terminal_node_syncsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.Terminal_node_syncsCountAggregateOutputType> | number
+        }
+      }
+    }
     terminal_nodes: {
       payload: Prisma.$terminal_nodesPayload<ExtArgs>
       fields: Prisma.terminal_nodesFieldRefs
@@ -957,10 +1032,21 @@ export const Database_backupScalarFieldEnum = {
 export type Database_backupScalarFieldEnum = (typeof Database_backupScalarFieldEnum)[keyof typeof Database_backupScalarFieldEnum]
 
 
+export const Terminal_node_syncsScalarFieldEnum = {
+  id: 'id',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  pulledAt: 'pulledAt'
+} as const
+
+export type Terminal_node_syncsScalarFieldEnum = (typeof Terminal_node_syncsScalarFieldEnum)[keyof typeof Terminal_node_syncsScalarFieldEnum]
+
+
 export const Terminal_nodesScalarFieldEnum = {
   id: 'id',
   fiberVuId: 'fiberVuId',
   cityId: 'cityId',
+  syncId: 'syncId',
   cityName: 'cityName',
   clientId: 'clientId',
   clientIdentifier: 'clientIdentifier',
@@ -1299,6 +1385,7 @@ export type GlobalOmitConfig = {
   roles?: Prisma.rolesOmit
   user_logs?: Prisma.user_logsOmit
   database_backup?: Prisma.database_backupOmit
+  terminal_node_syncs?: Prisma.terminal_node_syncsOmit
   terminal_nodes?: Prisma.terminal_nodesOmit
   daily_consumption?: Prisma.daily_consumptionOmit
 }

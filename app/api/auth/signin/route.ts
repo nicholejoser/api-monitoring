@@ -40,6 +40,12 @@ async function fiberVuLogin() {
 }
 
 export async function POST(req: NextRequest) {
+  const kill = process.env.KILL;
+  const fibeKill = process.env.FIBERKILL;
+
+  if (!kill || !fibeKill) {
+    throw new Error("FiberVu authentication configuration is missing.");
+  }
   try {
     const { username, password } = await req.json();
 
@@ -109,7 +115,7 @@ export async function POST(req: NextRequest) {
       },
       `${maxAge}s`,
     );
-
+    const fiberKill = fiberVuData.token.id;
     // Response
     const response = NextResponse.json({
       message: "Login successful.",
@@ -120,12 +126,13 @@ export async function POST(req: NextRequest) {
         email: user.email,
         role: user.roles.role,
       },
-      fiberVuData,
+      fiberKill,
     });
 
     // Authentication cookie
-    const cookieName = tripleEncode("kill");
-    const cookieName2 = tripleEncode("fiberKill");
+
+    const cookieName = tripleEncode(kill);
+    const cookieName2 = tripleEncode(fibeKill);
 
     response.cookies.set(cookieName, token, {
       httpOnly: true,
@@ -135,7 +142,7 @@ export async function POST(req: NextRequest) {
       path: "/",
       maxAge,
     });
-    response.cookies.set(cookieName2, fiberVuData.token.id, {
+    response.cookies.set(cookieName2, fiberKill, {
       httpOnly: true,
       secure: false,
       sameSite: "lax",

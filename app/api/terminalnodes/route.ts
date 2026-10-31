@@ -7,11 +7,11 @@ import {
   setRunning,
   resetProgress,
 } from "../../../lib/utils";
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
 export const dynamic = "force-dynamic";
 
 const BASE_URL = "https://110.93.79.226/api/views/fttx/terminal-nodes";
-
 const LIMIT = 100;
 
 export async function GET(req: NextRequest) {
@@ -24,14 +24,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Missing token" }, { status: 401 });
   }
 
-  // Retrieve records from PostgreSQL instead of reading JSON files.
+  // Retrieve existing terminal nodes.
   if (reqType === "exist") {
     try {
       const records = await prisma.terminal_nodes.findMany({
         orderBy: { name: "desc" },
       });
 
-      // Preserve the FiberVu ID as `id` for existing frontend code.
       const data = records.map(({ id, fiberVuId, ...record }) => ({
         ...record,
         id: fiberVuId,
@@ -49,6 +48,32 @@ export async function GET(req: NextRequest) {
     }
   }
 
+  // Validate date parameters.
+  const startDateParam = searchParams.get("startDate");
+  const endDateParam = searchParams.get("endDate");
+
+  if (!startDateParam || !endDateParam) {
+    return NextResponse.json(
+      { error: "Missing startDate or endDate" },
+      { status: 400 },
+    );
+  }
+
+  // Store calendar dates without timezone conversion.
+  const startDate = new Date(`${startDateParam}T00:00:00.000Z`);
+  const endDate = new Date(`${endDateParam}T00:00:00.000Z`);
+
+  if (
+    Number.isNaN(startDate.getTime()) ||
+    Number.isNaN(endDate.getTime()) ||
+    startDate > endDate
+  ) {
+    return NextResponse.json(
+      { error: "Invalid date range" },
+      { status: 400 },
+    );
+  }
+
   // Prevent overlapping synchronization requests.
   if (isRunning) {
     return NextResponse.json({ message: "Already running" }, { status: 409 });
@@ -63,6 +88,14 @@ export async function GET(req: NextRequest) {
   let totalUpdated = 0;
 
   try {
+    // Create synchronization batch.
+    const syncBatch = await prisma.terminal_node_syncs.create({
+      data: {
+        startDate,
+        endDate,
+      },
+    });
+
     while (true) {
       const filter = {
         skip,
@@ -97,11 +130,8 @@ export async function GET(req: NextRequest) {
         throw new Error("FiberVu returned an invalid response");
       }
 
-      if (data.length === 0) {
-        break;
-      }
+      if (data.length === 0) break;
 
-      // Process each record using FiberVu's ID as the unique key.
       for (const node of data) {
         const {
           id: fiberVuId,
@@ -114,30 +144,39 @@ export async function GET(req: NextRequest) {
           ...fields
         } = node;
 
-        const existing = await prisma.terminal_nodes.findUnique({
-          where: { fiberVuId },
-          select: { id: true },
-        });
-
         const createData = {
           ...fields,
           fiberVuId,
+          syncId: syncBatch.id,
           createdAt: new Date(createdAt),
           hookedAt: new Date(hookedAt),
           modifiedAt: new Date(modifiedAt),
           deletedAt: deletedAt ? new Date(deletedAt) : null,
-          sipData: sipData,
-          todoTaskIds: todoTaskIds,
+          sipData,
+          todoTaskIds: todoTaskIds ?? [],
         };
 
-        const updateData = {
-          ...createData,
-        };
+        // Check whether this FiberVu node already exists
+        // in the current synchronization batch.
+        const existing = await prisma.terminal_nodes.findUnique({
+          where: {
+            fiberVuId_syncId: {
+              fiberVuId,
+              syncId: syncBatch.id,
+            },
+          },
+          select: { id: true },
+        });
 
         await prisma.terminal_nodes.upsert({
-          where: { fiberVuId },
+          where: {
+            fiberVuId_syncId: {
+              fiberVuId,
+              syncId: syncBatch.id,
+            },
+          },
           create: createData,
-          update: updateData,
+          update: createData,
         });
 
         if (existing) {
@@ -150,18 +189,18 @@ export async function GET(req: NextRequest) {
       totalFetched += data.length;
       incrementProgress(data.length);
 
-      if (data.length < LIMIT) {
-        break;
-      }
+      if (data.length < LIMIT) break;
 
       skip += LIMIT;
 
-      // Avoid sending requests too quickly to FiberVu.
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
 
     return NextResponse.json({
       message: "Terminal nodes synchronized successfully",
+      syncId: syncBatch.id,
+      startDate,
+      endDate,
       totalFetched,
       totalCreated,
       totalUpdated,

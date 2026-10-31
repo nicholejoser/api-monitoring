@@ -66,7 +66,28 @@ export function formatNumberDecimal(value: number) {
     maximumFractionDigits: 2,
   }).format(value);
 }
+export const formatDate = (date: Date | string) => {
+  const options: Intl.DateTimeFormatOptions = {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  };
 
+  return new Date(date).toLocaleDateString("en-CA", options);
+};
+export const formatDateTime = (date: Date | string) => {
+  return new Date(date).toLocaleString("en-PH", {
+    timeZone: "Asia/Manila",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
+};
 export let jobProgress = 0;
 export let isRunning = false;
 
@@ -118,7 +139,7 @@ export const oneDecode = (value: string): string => {
 export const tripleDecode = (value: string): string => {
   return atob(atob(atob(value)));
 };
-  
+
 export function isWithinDateRange(
   consumptionDay: string,
   startDate?: Date,

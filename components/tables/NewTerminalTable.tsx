@@ -15,18 +15,27 @@ import {
   SelectValue,
 } from "../ui/select";
 import { DialogScrollableContent } from "../DialogScrollableContent";
-import { formatBytes, getEndOfMonth, getStartOfMonth } from "../../lib/utils";
+import { formatBytes } from "../../lib/utils";
 import { ChevronDown, ChevronUp, DatabaseSearch, Download } from "lucide-react";
 import * as XLSX from "xlsx";
 import { DatePickerInput } from "../DatePickerInput";
 
+type Props = {
+  data: TerminalNode[];
+  consumptionData: ConsumptionGroupedByClient[];
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+  setStartDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+  setEndDate: React.Dispatch<React.SetStateAction<Date | undefined>>;
+};
 export default function NewTerminalTable({
   data,
   consumptionData,
-}: {
-  data: TerminalNode[];
-  consumptionData: ConsumptionGroupedByClient[];
-}) {
+  startDate,
+  endDate,
+  setStartDate,
+  setEndDate,
+}: Props) {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -34,10 +43,6 @@ export default function NewTerminalTable({
   const [packageFilter, setPackageFilter] = useState<string>("all");
   const [openDialog, setOpenDialog] = useState<boolean>(false);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [startDate, setStartDate] = useState<Date | undefined>(
-    getStartOfMonth(),
-  );
-  const [endDate, setEndDate] = useState<Date | undefined>(getEndOfMonth());
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: "asc" | "desc";
@@ -54,21 +59,23 @@ export default function NewTerminalTable({
   // 🔍 Filtered data
   const filteredData = useMemo(() => {
     return data.filter((item) => {
-      const matchSearch = `${item.clientName} ${item.cityName} ${item.status}`
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      const matchSearch =
+        `${item.clientId} ${item.clientName} ${item.cityName} ${item.status} ${item.packageName} ${item.oltName} ${item.serialNumber}`
+          .toLowerCase()
+          .includes(search.toLowerCase());
 
       const matchStatus =
         statusFilter === "all" || item.status === statusFilter;
       const matchPackage =
         packageFilter === "all" ||
-        !(item.packageName ?? "")
+        (item.packageName ?? "")
           .toLowerCase()
           .includes(packageFilter.toLowerCase());
 
       return matchSearch && matchStatus && matchPackage;
     });
   }, [data, search, statusFilter, packageFilter]);
+
   const enrichedData = useMemo(() => {
     return filteredData.map((item) => {
       const clientConsumption = consumptionMap[item.clientId] || [];
@@ -119,13 +126,6 @@ export default function NewTerminalTable({
         : String(bVal).localeCompare(String(aVal));
     });
   };
-  // 📄 Pagination
-  //   const totalPages = Math.ceil(filteredData.length / limit);
-
-  //   const paginatedData = useMemo(() => {
-  //     const start = (page - 1) * limit;
-  //     return filteredData.slice(start, start + limit);
-  //   }, [filteredData, page, limit]);
   const totalPages =
     limit === data.length ? 1 : Math.ceil(filteredData.length / limit);
   const start = (page - 1) * limit;

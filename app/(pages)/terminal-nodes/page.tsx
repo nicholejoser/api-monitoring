@@ -3,56 +3,35 @@ import BreadCrumb from "@/components/BreadCrumb";
 import Loading from "@/components/Loading";
 import TerminalTable from "@/components/tables/TerminalTable";
 import TerminalNodesList from "@/components/TerminalNodesList";
-
 import { useData } from "@/context/DataContext";
 import { getEndOfMonth, getStartOfMonth } from "@/lib/utils";
+import { useDataStore } from "@/store/data-store";
 import { Settings } from "lucide-react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 export default function TerminalNodesAll() {
-  const { terminalNodeData, consumptionGroupData, isLoading, fiberKill } =
-    useData();
+  const { fiberKill } = useData();
+  const consumptions = useDataStore((state) => state.consumptions);
+  const isLoading = useDataStore((state) => state.isLoading);
+  const terminalNodes = useDataStore((state) => state.terminalNodes);
+  const syncs = useDataStore((state) => state.syncs);
+  const fetchSyncs = useDataStore((state) => state.fetchSyncs);
 
   const [startDate, setStartDate] = useState<Date | undefined>(
     getStartOfMonth(),
   );
-
   const [endDate, setEndDate] = useState<Date | undefined>(getEndOfMonth());
-
   const router = useRouter();
 
-  const [files, setFiles] = useState<string[]>([]);
-
-  const [selected, setSelected] = useState<string>("");
-
+  const [selected, setSelected] = useState<number | null>(null);
   const hasFetchedRef = useRef<boolean>(false);
 
   useEffect(() => {
     if (hasFetchedRef.current) return;
-
     hasFetchedRef.current = true;
-
-    const loadFiles = async () => {
-      try {
-        const res = await fetch("/api/data-files");
-
-        if (!res.ok) {
-          throw new Error(`Failed to load files: ${res.status}`);
-        }
-
-        const data = await res.json();
-
-        setFiles(data);
-      } catch (error) {
-        console.error(error);
-        toast.error("Failed loading data options");
-      }
-    };
-
-    loadFiles();
-  }, []);
+    fetchSyncs();
+  }, [fetchSyncs]);
 
   return (
     <div className="w-full flex flex-col gap-8 font-lexend">
@@ -70,7 +49,7 @@ export default function TerminalNodesAll() {
         <div className="flex flex-col justify-center gap-3 p-6">
           <div className="flex flex-row items-center justify-between gap-3">
             <TerminalNodesList
-              files={files}
+              syncs={syncs}
               selected={selected}
               setSelected={setSelected}
               setStartDate={setStartDate}
@@ -95,8 +74,8 @@ export default function TerminalNodesAll() {
           </div>
           <div className="rounded-xl border border-gray-200 shadow-md p-5">
             <TerminalTable
-              terminalNodedata={terminalNodeData}
-              consumptionData={consumptionGroupData}
+              terminalNodedata={terminalNodes}
+              consumptionData={consumptions}
               startDate={startDate}
               endDate={endDate}
               setStartDate={setStartDate}

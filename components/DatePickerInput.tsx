@@ -13,9 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Calendar } from "./ui/calendar";
 
 function formatDate(date: Date | undefined) {
-  if (!date) {
-    return "";
-  }
+  if (!date) return "";
 
   return date.toLocaleDateString("en-US", {
     day: "2-digit",
@@ -25,10 +23,7 @@ function formatDate(date: Date | undefined) {
 }
 
 function isValidDate(date: Date | undefined) {
-  if (!date) {
-    return false;
-  }
-  return !isNaN(date.getTime());
+  return !!date && !isNaN(date.getTime());
 }
 
 export function DatePickerInput({
@@ -40,26 +35,34 @@ export function DatePickerInput({
 }) {
   const [open, setOpen] = React.useState(false);
   const [month, setMonth] = React.useState<Date | undefined>(date);
-  const [value, setValue] = React.useState(formatDate(date));
-  React.useEffect(() => {
-    setMonth(date);
-    setValue(formatDate(date));
-  }, [date]);
+  const [inputValue, setInputValue] = React.useState<string | null>(null);
+
+  // If the parent changes the date, display the new date.
+  const value = inputValue ?? formatDate(date);
+
   return (
     <Field className="mx-auto w-48">
-      {/* <FieldLabel htmlFor="date-required">Subscription Date</FieldLabel> */}
       <InputGroup className="h-11!">
         <InputGroupInput
           id="date-required"
           value={value}
           placeholder="June 01, 2025"
           onChange={(e) => {
-            const date = new Date(e.target.value);
-            setValue(e.target.value);
-            if (isValidDate(date)) {
-              setDate(date);
-              setMonth(date);
+            const input = e.target.value;
+
+            setInputValue(input);
+
+            const parsedDate = new Date(input);
+
+            if (isValidDate(parsedDate)) {
+              setDate(parsedDate);
+              setMonth(parsedDate);
+              setInputValue(null);
             }
+          }}
+          onBlur={() => {
+            // Restore the formatted date if the input is invalid.
+            setInputValue(null);
           }}
           onKeyDown={(e) => {
             if (e.key === "ArrowDown") {
@@ -68,6 +71,7 @@ export function DatePickerInput({
             }
           }}
         />
+
         <InputGroupAddon align="inline-end">
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
@@ -81,6 +85,7 @@ export function DatePickerInput({
                 <span className="sr-only">Select date</span>
               </InputGroupButton>
             </PopoverTrigger>
+
             <PopoverContent
               className="w-auto overflow-hidden p-0"
               align="end"
@@ -92,9 +97,10 @@ export function DatePickerInput({
                 selected={date}
                 month={month}
                 onMonthChange={setMonth}
-                onSelect={(date) => {
-                  setDate(date);
-                  setValue(formatDate(date));
+                onSelect={(selectedDate) => {
+                  setDate(selectedDate);
+                  setMonth(selectedDate);
+                  setInputValue(null);
                   setOpen(false);
                 }}
               />

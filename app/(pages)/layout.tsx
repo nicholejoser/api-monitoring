@@ -23,23 +23,23 @@ export default async function DashboardLayout({
   const encodedFiberKill = tripleEncode(fibeKill);
   const token = cookieStore.get(encodedKill)?.value;
 
-  console.log("This is the token from layout", token);
   if (!token) {
     redirect("/");
   }
 
   let currentUser = null;
- try {
-  currentUser = await getCurrentUser();
-} catch (error) {
-  console.error("Invalid token:", error);
-}
+  try {
+    currentUser = await getCurrentUser();
+  } catch (error) {
+    console.error("Invalid token:", error);
+  }
 
-if (!currentUser) {
-  redirect("/");
-}
+  if (!currentUser) {
+    redirect("/");
+  }
   const fiberKill = cookieStore.get(encodedFiberKill)?.value ?? "";
-  console.log(fiberKill)
+  console.log(fiberKill);
+  console.log(encodedFiberKill);
   return (
     <DataProvider currentUser={currentUser} fiberKill={fiberKill}>
       <div className="flex h-screen overflow-hidden bg-gray-50 font-sans">

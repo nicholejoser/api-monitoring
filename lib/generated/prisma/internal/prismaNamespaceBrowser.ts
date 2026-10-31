@@ -55,6 +55,7 @@ export const ModelName = {
   roles: 'roles',
   user_logs: 'user_logs',
   database_backup: 'database_backup',
+  terminal_node_syncs: 'terminal_node_syncs',
   terminal_nodes: 'terminal_nodes',
   daily_consumption: 'daily_consumption'
 } as const
@@ -127,10 +128,21 @@ export const Database_backupScalarFieldEnum = {
 export type Database_backupScalarFieldEnum = (typeof Database_backupScalarFieldEnum)[keyof typeof Database_backupScalarFieldEnum]
 
 
+export const Terminal_node_syncsScalarFieldEnum = {
+  id: 'id',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  pulledAt: 'pulledAt'
+} as const
+
+export type Terminal_node_syncsScalarFieldEnum = (typeof Terminal_node_syncsScalarFieldEnum)[keyof typeof Terminal_node_syncsScalarFieldEnum]
+
+
 export const Terminal_nodesScalarFieldEnum = {
   id: 'id',
   fiberVuId: 'fiberVuId',
   cityId: 'cityId',
+  syncId: 'syncId',
   cityName: 'cityName',
   clientId: 'clientId',
   clientIdentifier: 'clientIdentifier',

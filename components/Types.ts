@@ -6,16 +6,16 @@ export interface ConsumptionLog {
   createdAt: string;
   createdById: string;
   createdByName: string;
-  deletedAt: string;
+  deletedAt: string | null;
   email: string;
   id: string;
   identity: string;
   name: string;
   note: string;
-  outerIdentity: string;
+  outerIdentity: string | null;
   password: string;
   phone: string;
-  serviceAreaId: string;
+  serviceAreaId: string | null;
   street: string;
 }
 export interface BandwidthUsage {
@@ -41,7 +41,13 @@ export interface ChartPoint {
   down: number;
 }
 
+export interface ChartData {
+  day: string;
+  up: number;
+  down: number;
+}
 export interface DailyConsumption {
+  fiberVuId: number;
   clientName: string;
   consumptionDay: string;
   createdAt: string;
@@ -50,16 +56,24 @@ export interface DailyConsumption {
   terminalNodeId: number;
   up: string;
 }
+
 export interface ConsumptionGroupedByClient {
   clientId: number;
   data: DailyConsumption[];
 }
-export interface ChartData {
-  day: string;
-  up: number;
-  down: number;
-}
 
+export interface SavedConsumptionResponse {
+  message: string;
+  sync: {
+    id: number;
+    startDate: string;
+    endDate: string;
+    pulledAt: string;
+  };
+  totalClients: number;
+  totalRecords: number;
+  results: ConsumptionGroupedByClient[];
+}
 export interface ConsumptionItem {
   consumptionDay: string;
   up: string;
@@ -68,66 +82,74 @@ export interface ConsumptionItem {
 
 export interface TerminalNode {
   cityId: number;
-  cityName: string;
+  cityName: string | null;
   clientId: number;
-  clientIdentifier: string;
-  clientName: string;
+  clientIdentifier: string | null;
+  clientName: string | null;
   clientOuterIdentifier: string;
   comment: string | null;
-  contact: string;
-  contract: string;
+  contact: string | null;
+  contract: string | null;
   createdAt: string;
-  createdById: number;
-  createdByName: string;
+  createdById: number | null;
+  createdByName: string | null;
   customVlanTaggingIptvId: number | null;
   customVlanTaggingNetId: number | null;
   deletedAt: string | null;
   deletedById: number | null;
-  email: string;
+  email: string | null;
   fixIp: string | null;
   hookedAt: string;
-  hookedById: number;
-  hookedByName: string;
+  hookedById: number | null;
+  hookedByName: string | null;
   id: number;
   fiberVuId: number;
-  isFtth: boolean;
-  isPppoe: boolean;
-  isPppoeActive: boolean;
-  language: string;
-  mapDataId: number;
-  mapDataName: string;
+  isFtth: boolean | null;
+  isPppoe: boolean | null;
+  isPppoeActive: boolean | null;
+  language: string | null;
+  mapDataId: number | null;
+  mapDataName: string | null;
   modifiedAt: string;
-  modifiedById: number;
-  modifiedByName: string;
-  name: string;
-  number: number;
-  numberExt: string;
-  oltName: string;
-  onuOltId: number;
+  modifiedById: number | null;
+  modifiedByName: string | null;
+  name: string | null;
+  number: number | null;
+  numberExt: string | null;
+  oltName: string | null;
+  onuOltId: number | null;
   opticalDeviceId: number;
   outerIdentity: string | null;
-  packageName: string;
-  password: string;
-  phone: string;
+  packageName: string | null;
+  password: string | null;
+  phone: string | null;
   radiusPassword: string | null;
   radiusUsername: string | null;
-  rfEnabled: boolean;
-  serialNumber: string;
+  rfEnabled: boolean | null;
+  serialNumber: string | null;
   serviceAreaId: number | null;
   serviceAreaName: string | null;
   sipData: string | null;
-  status: string;
-  statusId: number;
+  status: string | null;
+  statusId: number | null;
   statusOperational: boolean;
-  streetId: number;
-  streetName: string;
-  terminalNodeOltId: string;
+  streetId: number | null;
+  streetName: string | null;
+  terminalNodeOltId: string | null;
   todoCount: number | null;
-  todoTaskIds: string | null;
-  tr069Enabled: boolean;
-  voipProvider: string;
-  voipProviderId: string;
-  wifi: boolean;
+  todoTaskIds: number[] | null;
+  tr069Enabled: boolean | null;
+  voipProvider: string | null;
+  voipProviderId: string | null;
+  wifi: boolean | null;
+}
+
+export interface TerminalNodeSync {
+  id: number;
+  startDate: Date;
+  endDate: Date;
+  pulledAt: Date;
+  totalRecords: number;
 }
 export interface RoleTypes {
   id: number;

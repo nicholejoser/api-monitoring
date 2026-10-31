@@ -5,58 +5,54 @@ import Loading from "@/components/Loading";
 import NewTerminalTable from "@/components/tables/NewTerminalTable";
 import { useData } from "@/context/DataContext";
 import {
-  cn,
-  formatMonthYear,
+  formatDate,
   formatNumber,
   getEndOfMonth,
   getStartOfMonth,
 } from "@/lib/utils";
-import {
-  Check,
-  ChevronsUpDown,
-  Download,
-  Info,
-  RefreshCcw,
-} from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Info, RefreshCcw } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ConsumptionGroupedByClient, TerminalNode } from "@/components/Types";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
 import UploadJson from "@/components/UploadJson";
+import { useDataStore } from "@/store/data-store";
+import TerminalNodesList from "@/components/TerminalNodesList";
 
 export default function TerminalNodeSettings() {
   const { fiberKill } = useData();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [terminalNodeData, setTerminalNodeData] = useState<TerminalNode[]>([]);
-  const [consumptionGroupData, setConsumptionGroupData] = useState<
-    ConsumptionGroupedByClient[]
-  >([]);
+  const {
+    fetchSyncs,
+    fetchConsumptions,
+    syncs,
+    consumptions,
+    terminalNodes,
+    isLoading,
+    setIsLoading,
+  } = useDataStore();
+  const [selected, setSelected] = useState<number | null>(null);
   const [startDate, setStartDate] = useState<Date | undefined>(
     getStartOfMonth(),
   );
-  const [open, setOpen] = useState<boolean>(false);
-
   const [endDate, setEndDate] = useState<Date | undefined>(getEndOfMonth());
   const [fetched, setFetched] = useState<number>(0);
-  const [files, setFiles] = useState<string[]>([]);
-  const [selected, setSelected] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  const hasFetchedRef = useRef<boolean>(false);
+
+  useEffect(() => {
+    if (hasFetchedRef.current) return;
+    hasFetchedRef.current = true;
+    fetchSyncs();
+  }, [fetchSyncs]);
 
   const handleTerminalNode = async () => {
     setIsLoading(true);
-    fetch(`/api/terminalnodes?token=${fiberKill}`, {
+    console.log(formatDate(startDate!));
+    console.log(formatDate(endDate!));
+    const params = new URLSearchParams({
+      token: fiberKill,
+      startDate: startDate ? formatDate(startDate) : "",
+      endDate: endDate ? formatDate(endDate) : "",
+    });
+
+    fetch(`/api/terminalnodes?${params}`, {
       method: "GET",
     });
 
@@ -74,112 +70,53 @@ export default function TerminalNodeSettings() {
     }, 500);
   };
   const handleConsMultiple = async () => {
+    if (selected === null) {
+      toast.error("Please select a synchronization first.");
+      return;
+    }
+
     setIsLoading(true);
+    setFetched(0);
+
+    let interval: NodeJS.Timeout | undefined;
+
     try {
-      fetch(
-        `/api/consumption?token=${fiberKill}&type=multiple&date=${selected}&start=${startDate?.toLocaleDateString("en-CA")}&end=${endDate?.toLocaleDateString("en-CA")}`,
+      const requestPromise = fetchConsumptions(selected, fiberKill);
+
+      interval = setInterval(async () => {
+        try {
+          const res = await fetch("/api/progress");
+          if (!res.ok) return;
+
+          const progress = await res.json();
+
+          setFetched(progress.fetched);
+
+          if (!progress.running) {
+            if (interval) clearInterval(interval);
+          }
+        } catch (error) {
+          console.error("Failed to fetch progress:", error);
+        }
+      }, 500);
+
+      const data = await requestPromise;
+
+      toast.success(data.message, {
+        description: `Total clients: ${data.totalClients}. Total fetched: ${data.totalFetched}`,
+      });
+    } catch (err) {
+      console.error("Consumption request failed:", err);
+
+      toast.error(
+        err instanceof Error ? err.message : "Failed to fetch consumption data",
       );
-      const interval = setInterval(async () => {
-        const res = await fetch("/api/progress");
-        const data = await res.json();
-
-        setFetched(data.fetched);
-        if (!data.running) {
-          clearInterval(interval);
-          setIsLoading(false);
-          toast.success(data.message, {
-            description: `Total clients: ${data.totalClients}. Total fetched: ${data.totalFetched}`,
-          });
-        }
-      }, 2000);
-    } catch (err) {
-      console.error("Request failed:", err);
-    }
-  };
-  // to generate the filtered clients, those status = "Connected" and excluding those packageName includes "CHB"
-  const handleFilteredTerminalNode = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/filter-terminal-nodes?date=${selected}`);
-      if (res.ok) {
-        toast.success("Terminal Nodes Filtered", {
-          description:
-            "Only connected nodes are included; CHB package entries are excluded.",
-        });
-      }
-      const data = await res.json();
-      setTerminalNodeData(data);
-    } catch (err) {
-      console.error(err);
     } finally {
-      setLoading(false);
+      if (interval) clearInterval(interval);
+      setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const loadFiles = async () => {
-      try {
-        const res = await fetch("/api/data-files");
-        const data = await res.json();
-
-        if (isMounted) {
-          setFiles(data);
-        }
-      } catch {
-        toast.error("Failed loading data options");
-      }
-    };
-
-    loadFiles();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!selected) return;
-
-    const fetchSelectedData = async () => {
-      try {
-        setIsLoading(true);
-        const date = new Date(selected);
-        setStartDate(getStartOfMonth(date));
-        setEndDate(getEndOfMonth(date));
-        const res = await fetch(
-          `/api/terminalnodes?token=${fiberKill}&type=exist&date=${selected}`,
-          { method: "GET" },
-        );
-        if (!res.ok) {
-          toast.error(`Error fetching terminal nodes`, {
-            description: `${res.status}`,
-          });
-        }
-        const data = await res.json();
-
-        setTerminalNodeData(data);
-
-        toast.success("Terminal Node Data loaded successfully!");
-      } catch (err) {
-        console.error(err);
-        toast.error("Failed to load selected data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchSelectedData();
-  }, [
-    fiberKill,
-    selected,
-    setConsumptionGroupData,
-    setEndDate,
-    setIsLoading,
-    setStartDate,
-    setTerminalNodeData,
-  ]);
+  console.log(consumptions);
   return (
     <div className="w-full flex flex-col justify-center gap-5">
       {isLoading && (
@@ -188,7 +125,7 @@ export default function TerminalNodeSettings() {
           description={`Fetched ${formatNumber(fetched)} records so far...`}
         />
       )}
-      {loading && (
+      {isLoading && (
         <Loading
           title="Filtering Terminal Nodes"
           description={`Filtered based on status connected and excluce CHB records`}
@@ -212,60 +149,14 @@ export default function TerminalNodeSettings() {
         </div>
         <div className="w-full flex flex-col bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg shadow-gray-200/50 border border-white/60 p-5 gap-3">
           <div className="w-full flex flex-col justify-between lg:flex-row lg:items-center gap-6">
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  className="w-52 h-11 justify-between bg-white border-gray-300 shadow-sm cursor-pointer"
-                >
-                  {selected ? formatMonthYear(selected) : "Select data"}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-52 p-0">
-                <Command>
-                  <CommandInput placeholder="Search data..." />
-                  <CommandEmpty>No data found.</CommandEmpty>
-
-                  <CommandGroup>
-                    {files.map((file) => (
-                      <CommandItem
-                        key={file}
-                        value={`${formatMonthYear(file)} ${file}`} // 🔥 best
-                        onSelect={() => {
-                          setSelected(file);
-                          setOpen(false);
-                        }}
-                        className="cursor-pointer"
-                      >
-                        <div className="w-full flex flex-col">
-                          <span>{formatMonthYear(file)}</span>
-                          <span className="text-xs text-gray-400">
-                            {file.split("/").pop()}
-                          </span>
-                        </div>
-
-                        <Check
-                          className={cn(
-                            "ml-auto shrink-0 h-4 w-4",
-                            selected === file ? "opacity-100" : "opacity-0",
-                          )}
-                        />
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <TerminalNodesList
+              syncs={syncs}
+              selected={selected}
+              setSelected={setSelected}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
+            />
             <div className="flex flex-row items-center gap-3">
-              <button
-                onClick={handleFilteredTerminalNode}
-                className="w-fit flex items-center gap-1 bg-slate-600 border border-transparent text-white hover:bg-white hover:text-slate-600 hover:border-slate-600 px-3 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-lg shadow-slate-200/50 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none active:scale-[0.97]"
-              >
-                <Download className="w-5 h-5 shrink-0" />
-                {loading ? "Processing..." : "Filter Terminal Nodes"}
-              </button>
               <button
                 onClick={handleTerminalNode}
                 disabled={!fiberKill}
@@ -278,8 +169,12 @@ export default function TerminalNodeSettings() {
           </div>
           <div className="w-full">
             <NewTerminalTable
-              data={terminalNodeData}
-              consumptionData={consumptionGroupData}
+              data={terminalNodes}
+              consumptionData={consumptions}
+              startDate={startDate}
+              endDate={endDate}
+              setStartDate={setStartDate}
+              setEndDate={setEndDate}
             />
           </div>
         </div>

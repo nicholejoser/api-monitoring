@@ -1,36 +1,56 @@
 "use client";
 
 import { create } from "zustand";
-import { toast } from "sonner";
-
-import { ConsumptionGroupedByClient, TerminalNode } from "@/components/Types";
-import { redirect } from "next/navigation";
+import {
+  ConsumptionGroupedByClient,
+  SavedConsumptionResponse,
+  TerminalNode,
+  TerminalNodeSync,
+} from "@/components/Types";
+import {
+  ConsumptionResponse,
+  fetchConsumptionsBySync,
+  fetchSavedConsumptions,
+  fetchTerminalNodesBySync,
+  fetchTerminalNodeSyncs,
+} from "@/lib/requests/terminalNodes";
 
 interface DataStore {
-  terminalNodeData: TerminalNode[];
-  consumptionGroupData: ConsumptionGroupedByClient[];
+  syncs: TerminalNodeSync[];
+  terminalNodes: TerminalNode[];
+  consumptions: ConsumptionGroupedByClient[];
 
   isLoading: boolean;
   fvKill: string;
 
+  setSyncs: React.Dispatch<React.SetStateAction<TerminalNodeSync[]>>;
   setIsLoading: (value: boolean) => void;
+
+  fetchConsumptions: (
+    syncId: number,
+    token: string,
+  ) => Promise<ConsumptionResponse>;
+  fetchSyncs: () => Promise<void>;
+  fetchSavedConsumptions: (syncId: number) => Promise<SavedConsumptionResponse>;
+
   setFVKill: (value: string) => void;
-
   setTerminalNodeData: (data: TerminalNode[]) => void;
-
   setConsumptionGroupData: (data: ConsumptionGroupedByClient[]) => void;
-
-  refreshData: (date: string) => Promise<void>;
-
+  refreshData: (date: number) => Promise<void>;
   clearData: () => void;
 }
 
 export const useDataStore = create<DataStore>((set) => ({
-  terminalNodeData: [],
-  consumptionGroupData: [],
-
+  terminalNodes: [],
+  consumptions: [],
+  syncs: [],
   isLoading: false,
   fvKill: "",
+
+  setSyncs: (syncs) =>
+    set((state) => ({
+      syncs: typeof syncs === "function" ? syncs(state.syncs) : syncs,
+    })),
 
   setIsLoading: (value) => {
     set({ isLoading: value });
@@ -42,79 +62,77 @@ export const useDataStore = create<DataStore>((set) => ({
 
   setTerminalNodeData: (data) => {
     set({
-      terminalNodeData: data,
+      terminalNodes: data,
     });
   },
 
   setConsumptionGroupData: (data) => {
     set({
-      consumptionGroupData: data,
+      consumptions: data,
     });
   },
-
-  refreshData: async (date: string) => {
+  fetchSyncs: async () => {
     try {
-      set({
-        isLoading: true,
-      });
-
-      const [terminalResponse, consumptionResponse] = await Promise.all([
-        fetch(`/data/${date}/filtered_terminal_nodes.json`),
-        fetch(`/data/${date}/consumption_data.json`),
-      ]);
-
-      if (!terminalResponse.ok || !consumptionResponse.ok) {
-        redirect("/");
-      }
-
-      const [terminalData, consumptionData] = await Promise.all([
-        terminalResponse.json() as Promise<TerminalNode[]>,
-
-        consumptionResponse.json() as Promise<ConsumptionGroupedByClient[]>,
-      ]);
-
-      // ------------------------------------------
-      // Update terminal data
-      // ------------------------------------------
-
-      set({
-        terminalNodeData: terminalData,
-      });
-
-      // Allow browser to render
-      await new Promise<void>((resolve) => {
-        setTimeout(resolve, 0);
-      });
-
-      // ------------------------------------------
-      // Update consumption data
-      // ------------------------------------------
-
-      set({
-        consumptionGroupData: consumptionData,
-      });
-
-      toast.success("Data loaded successfully!");
+      const syncs = await fetchTerminalNodeSyncs();
+      set({ syncs });
     } catch (error) {
-      console.error("Failed to load selected data:", error);
+      console.error("Failed to fetch synchronization history:", error);
+    }
+  },
+  fetchConsumptions: async (syncId, token) => {
+    set({ isLoading: true });
 
-      toast.error("Failed to load selected data");
+    try {
+      const data = await fetchConsumptionsBySync(syncId, token);
 
-      set({
-        terminalNodeData: [],
-        consumptionGroupData: [],
-      });
+      set({ consumptions: data.results });
+
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch consumptions:", error);
+      throw error;
     } finally {
+      set({ isLoading: false });
+    }
+  },
+  fetchSavedConsumptions: async (syncId) => {
+    set({ isLoading: true });
+
+    try {
+      const data = await fetchSavedConsumptions(syncId);
+
       set({
-        isLoading: false,
+        consumptions: data.results,
       });
+
+      return data;
+    } catch (error) {
+      console.error("Failed to fetch saved consumptions:", error);
+      throw error;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+  refreshData: async (syncId) => {
+    set({ isLoading: true });
+
+    try {
+      const data = await fetchTerminalNodesBySync(syncId);
+
+      set({
+        terminalNodes: data.records,
+      });
+    } catch (error) {
+      console.error("Failed to fetch terminal nodes:", error);
+    } finally {
+      set({ isLoading: false });
     }
   },
 
   clearData: () => {
     set({
-      terminalNodeData: [],
-      consumptionGroupData: [],
+      terminalNodes: [],
+      consumptions: [],
     });
   },
 }));

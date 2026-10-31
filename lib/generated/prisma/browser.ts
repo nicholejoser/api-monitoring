@@ -38,6 +38,11 @@ export type user_logs = Prisma.user_logsModel
  */
 export type database_backup = Prisma.database_backupModel
 /**
+ * Model terminal_node_syncs
+ * 
+ */
+export type terminal_node_syncs = Prisma.terminal_node_syncsModel
+/**
  * Model terminal_nodes
  * 
  */
